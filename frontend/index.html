@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gestión de citas y fichas clínicas para clínicas veterinarias">
+  <title>Inicio | VetCitas</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendors/boldo/theme.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-vet sticky-top" aria-label="Navegación principal">
+      <div class="container">
+        <a class="navbar-brand" href="index.html"><i class="fa-solid fa-paw logo-icono"></i> VetCitas</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav-principal" aria-controls="nav-principal" aria-expanded="false" aria-label="Abrir menú">
+          <i class="fa-solid fa-bars text-white fs-2"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="nav-principal">
+          <ul class="navbar-nav ms-auto align-items-lg-center">
+            <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="citas.html">Citas</a></li>
+            <li class="nav-item"><a class="nav-link" href="mascotas.html">Mascotas</a></li>
+            <li class="nav-item mt-2 mt-lg-0 ms-lg-3"><a class="btn btn-success text-dark px-4 py-2" href="nueva-cita.html">Agendar cita</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="contenido">
+    <div id="mensajes" aria-live="polite"></div>
+
+    <!-- Banner principal -->
+    <section class="hero">
+      <img class="hero-fondo" src="img/hero-bg.png" alt="">
+      <div class="container position-relative">
+        <div class="row align-items-center g-4">
+          <div class="col-lg-7 text-center text-lg-start">
+            <p class="text-white-50 mb-2" id="fecha-hoy"></p>
+            <h1 class="hero-titulo">Tu mascota en buenas manos, <strong>su historial siempre a mano</strong></h1>
+            <p class="hero-texto my-4 mx-auto mx-lg-0">Agenda horas, revisa el historial clínico y da seguimiento a cada tratamiento desde un solo lugar.</p>
+            <div class="d-sm-flex justify-content-center justify-content-lg-start gap-3">
+              <a href="nueva-cita.html" class="btn btn-success text-dark mb-3">Agendar cita</a>
+              <a href="citas.html" class="btn btn-outline-light mb-3">Ver citas</a>
+            </div>
+          </div>
+          <div class="col-lg-5 align-self-end text-center">
+            <img class="hero-imagen" src="img/gatogris.webp" alt="Gatito gris de pelo corto sentado">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Acerca de nosotros -->
+    <section class="seccion nosotros" id="nosotros" aria-labelledby="titulo-nosotros">
+      <div class="container">
+        <div class="row g-5 align-items-center">
+          <div class="col-lg-6">
+            <span class="etiqueta-seccion">Acerca de nosotros</span>
+            <h2 id="titulo-nosotros" class="titulo-grande">Una herramienta simple para clínicas veterinarias pequeñas</h2>
+            <p>VetCitas es un proyecto desarrollado por estudiantes de la asignatura <strong>PTEC103 Desarrollo Web y Móvil</strong>. Nuestro objetivo es digitalizar la gestión de citas y el historial clínico de las mascotas, para que dueños y personal de la clínica accedan a la misma información desde la web y el celular.</p>
+            <p class="mb-0">Pensamos en dos tipos de usuarios: los <strong>dueños de mascotas</strong>, que necesitan agendar horas y revisar el historial de su mascota, y el <strong>personal de la clínica</strong> (veterinarios y recepcionistas), que gestiona las citas y registra cada atención.</p>
+          </div>
+          <div class="col-lg-6">
+            <div class="tarjeta-vet tarjeta-oscura">
+              <h3 class="titulo-tarjeta"><i class="fa-solid fa-lightbulb me-2"></i>¿Por qué elegimos esta idea?</h3>
+              <p>Muchas clínicas veterinarias pequeñas todavía agendan sus citas por <strong>WhatsApp o teléfono</strong>, anotando en cuadernos o planillas. No existe un registro centralizado de cada mascota, y la información queda repartida entre mensajes, papeles y la memoria del personal.</p>
+              <p class="mb-0">Quisimos resolver un problema cotidiano y cercano, que afecta tanto a la clínica como a los dueños, con una solución que pueda crecer: primero una página web, luego un servidor y una base de datos, y finalmente una aplicación móvil.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="titulo-seccion text-center mt-6 mb-4">Los problemas que detectamos</h3>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <article class="tarjeta-vet problema">
+              <span class="problema-icono"><i class="fa-solid fa-file-circle-xmark"></i></span>
+              <h4 class="problema-titulo">Pérdida de información</h4>
+              <p class="mb-0">Diagnósticos y tratamientos quedan en papeles o chats y se pierden con el tiempo.</p>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="tarjeta-vet problema">
+              <span class="problema-icono"><i class="fa-solid fa-calendar-xmark"></i></span>
+              <h4 class="problema-titulo">Citas duplicadas</h4>
+              <p class="mb-0">Sin una agenda compartida, dos personas pueden reservar el mismo horario.</p>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="tarjeta-vet problema">
+              <span class="problema-icono"><i class="fa-solid fa-notes-medical"></i></span>
+              <h4 class="problema-titulo">Seguimiento difícil</h4>
+              <p class="mb-0">Sin historial por mascota, cuesta dar continuidad a vacunas, controles y tratamientos.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="solucion mt-5">
+          <div class="row g-4 align-items-center">
+            <div class="col-lg-5">
+              <span class="etiqueta-seccion etiqueta-clara">Nuestra solución</span>
+              <h3 class="solucion-titulo">Todo en un solo lugar, desde la web y el celular</h3>
+            </div>
+            <div class="col-lg-7">
+              <ul class="lista-check">
+                <li><i class="fa-solid fa-circle-check"></i> Registro de dueños y sus mascotas.</li>
+                <li><i class="fa-solid fa-circle-check"></i> Agendar, modificar y cancelar citas sin choques de horario.</li>
+                <li><i class="fa-solid fa-circle-check"></i> Historial clínico de cada mascota siempre disponible.</li>
+                <li><i class="fa-solid fa-circle-check"></i> Registro del diagnóstico y tratamiento después de cada atención.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="container d-md-flex justify-content-between align-items-center text-center text-md-start">
+      <p class="pie-logo mb-2 mb-md-0"><i class="fa-solid fa-paw"></i> VetCitas</p>
+      <p class="mb-0">&copy; <span id="anio-actual"></span> VetCitas · PTEC103 · Diseño basado en <a href="https://themewagon.com/themes/boldo/" target="_blank" rel="noopener">Boldo de ThemeWagon</a></p>
+    </div>
+  </footer>
+
+  <script src="vendors/bootstrap/bootstrap.min.js"></script>
+  <script src="vendors/fontawesome/all.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/validaciones.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

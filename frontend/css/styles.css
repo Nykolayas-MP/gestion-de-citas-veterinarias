@@ -1,0 +1,558 @@
+/* =========================================================
+   styles.css — Estilos propios de VetCitas
+   ---------------------------------------------------------
+   Se carga DESPUÉS de vendors/boldo/theme.min.css (plantilla
+   Boldo de ThemeWagon, basada en Bootstrap 5). Aquí van los
+   estilos creados por el grupo para los componentes que la
+   plantilla no trae.
+
+   1. Variables            6. Tablas y etiquetas de estado
+   2. Base                 7. Formularios
+   3. Menú                 8. Mensajes (alertas flotantes)
+   4. Banner (hero)        9. Modal de confirmación
+   5. Tarjetas            10. Pie de página
+   ========================================================= */
+
+/* ---------- 1. Variables (colores de la plantilla Boldo) ---------- */
+:root {
+  --vet-azul: #0a2640;
+  --vet-azul-claro: #1c3d5a;
+  --vet-menta: #65e4a3;
+  --vet-menta-suave: #e3f9ee;
+  --vet-texto: #5b7075;
+  --vet-borde: #e4ecee;
+  --vet-fondo: #f7f9fa;
+
+  --vet-exito: #15803d;
+  --vet-exito-fondo: #dcfce7;
+  --vet-error: #c62828;
+  --vet-error-fondo: #fde8e8;
+  --vet-aviso: #b45309;
+  --vet-aviso-fondo: #fef3c7;
+  --vet-info: #1d4ed8;
+  --vet-info-fondo: #dbeafe;
+
+  --vet-radio: 1.25rem;
+  --vet-sombra: 0 10px 30px rgba(10, 38, 64, 0.08);
+  --vet-fuente: "Manrope", "Open Sans", system-ui, sans-serif;
+}
+
+/* ---------- 2. Base ---------- */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--vet-fuente);
+  background-color: var(--vet-fondo);
+  color: var(--vet-texto);
+}
+
+/* La plantilla fuerza "Open Sans" en botones y formularios; usamos Manrope en todo. */
+input, button, select, textarea, label, .btn, .navbar, .alert, .badge, .invalid-feedback {
+  font-family: var(--vet-fuente);
+}
+
+h1, h2, h3, h4 {
+  color: var(--vet-azul);
+}
+
+.contenido {
+  flex: 1;
+}
+
+/* Padding más compacto que el de la plantilla (pensado para landing pages). */
+section.seccion {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.titulo-seccion {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+/* ---------- 3. Menú ---------- */
+.navbar-vet {
+  background-color: var(--vet-azul);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.navbar-vet .navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.navbar-vet .logo-icono {
+  color: var(--vet-menta);
+}
+
+.navbar-vet .nav-link {
+  font-weight: 600;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+.navbar-vet .nav-link.active {
+  color: var(--vet-menta);
+}
+
+/* ---------- 4. Banner (hero) ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--vet-azul);
+  padding-top: 3.5rem;
+  padding-bottom: 4rem;
+}
+
+.hero-fondo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero-titulo {
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.hero-titulo strong {
+  color: var(--vet-menta);
+  font-weight: 700;
+}
+
+.hero-texto {
+  color: #c9d6de;
+  font-size: 1.1rem;
+  max-width: 34rem;
+}
+
+/* Encabezado más pequeño para las páginas internas. */
+.hero-pagina {
+  padding-bottom: 3.5rem;
+}
+
+.hero-pagina .hero-titulo {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+/* Imagen del banner: se apoya en el borde inferior del banner. */
+.hero-imagen {
+  display: block;
+  width: 100%;
+  max-width: 350px; /* tamaño real de la imagen, para que no se vea borrosa */
+  margin: 0 auto -4rem;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.35));
+}
+
+/* ---------- 5. Tarjetas ---------- */
+.tarjeta-vet {
+  height: 100%;
+  background-color: #fff;
+  border: 1px solid var(--vet-borde);
+  border-radius: var(--vet-radio);
+  box-shadow: var(--vet-sombra);
+  padding: 1.5rem;
+}
+
+/* Sección "Acerca de nosotros" */
+.etiqueta-seccion {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  padding: 0.3rem 0.9rem;
+  border-radius: 5rem;
+  background-color: var(--vet-menta-suave);
+  color: var(--vet-azul);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.etiqueta-clara {
+  background-color: rgba(101, 228, 163, 0.15);
+  color: var(--vet-menta);
+}
+
+.titulo-grande {
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 1.25rem;
+}
+
+.tarjeta-oscura {
+  background-color: var(--vet-azul);
+  border-color: var(--vet-azul);
+  color: #c9d6de;
+  padding: 2rem;
+}
+
+.tarjeta-oscura strong {
+  color: #fff;
+}
+
+.titulo-tarjeta {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.titulo-tarjeta svg {
+  color: var(--vet-menta);
+}
+
+.problema {
+  text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.problema:hover {
+  transform: translateY(-4px);
+  border-color: var(--vet-menta);
+}
+
+.problema-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background-color: var(--vet-error-fondo);
+  color: var(--vet-error);
+  font-size: 1.4rem;
+}
+
+.problema-titulo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 1rem 0 0.4rem;
+}
+
+.solucion {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--vet-azul);
+  background-image: url("../img/hero-bg.png");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: auto 100%;
+  border-radius: var(--vet-radio);
+  padding: 2.5rem;
+}
+
+.solucion-titulo {
+  color: #fff;
+  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.lista-check {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-check li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.lista-check svg {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+  color: var(--vet-menta);
+}
+
+.vacio {
+  text-align: center;
+  padding: 2.5rem 1rem !important;
+  color: var(--vet-texto);
+}
+
+/* ---------- 6. Tablas y etiquetas de estado ---------- */
+.tabla-vet {
+  overflow-x: auto;
+  background-color: #fff;
+  border: 1px solid var(--vet-borde);
+  border-radius: var(--vet-radio);
+  box-shadow: var(--vet-sombra);
+}
+
+.tabla-vet .table {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.tabla-vet th {
+  background-color: var(--vet-azul);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1rem 1.25rem !important;
+}
+
+.tabla-vet td {
+  padding: 1rem 1.25rem !important;
+  vertical-align: middle;
+  border-color: var(--vet-borde);
+}
+
+.tabla-vet tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabla-vet tbody tr:hover td {
+  background-color: var(--vet-fondo);
+}
+
+.tabla-vet a {
+  font-weight: 700;
+  color: var(--vet-azul);
+}
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.8rem;
+  border-radius: 5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.estado::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.estado-pendiente {
+  background-color: var(--vet-aviso-fondo);
+  color: var(--vet-aviso);
+}
+
+.estado-atendida {
+  background-color: var(--vet-exito-fondo);
+  color: var(--vet-exito);
+}
+
+.estado-cancelada {
+  background-color: var(--vet-error-fondo);
+  color: var(--vet-error);
+}
+
+/* ---------- 7. Formularios ---------- */
+.form-label {
+  font-weight: 600;
+  color: var(--vet-azul);
+}
+
+.requerido {
+  color: var(--vet-error);
+}
+
+.form-control,
+.form-select {
+  border-radius: 0.9rem;
+  padding: 0.8rem 1.1rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--vet-menta);
+  box-shadow: 0 0 0 0.25rem rgba(101, 228, 163, 0.3);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--vet-error);
+}
+
+.invalid-feedback {
+  display: block;
+  color: var(--vet-error);
+  font-size: 0.85rem;
+}
+
+/* ---------- 8. Mensajes (alertas flotantes) ---------- */
+#mensajes {
+  position: fixed;
+  top: 6rem;
+  right: 1rem;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(380px, calc(100vw - 2rem));
+}
+
+.mensaje {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background-color: #fff;
+  border-left: 5px solid;
+  box-shadow: var(--vet-sombra);
+  font-weight: 600;
+  animation: aparecer 0.25s ease-out;
+}
+
+.mensaje-texto {
+  flex: 1;
+}
+
+.mensaje-exito {
+  border-color: var(--vet-exito);
+  color: var(--vet-exito);
+}
+
+.mensaje-error {
+  border-color: var(--vet-error);
+  color: var(--vet-error);
+}
+
+.mensaje-info {
+  border-color: var(--vet-info);
+  color: var(--vet-info);
+}
+
+.mensaje-cerrar {
+  background: none;
+  border: 0;
+  color: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ---------- 9. Modal de confirmación ---------- */
+.modal-vet-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 1090;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(10, 38, 64, 0.6);
+}
+
+.modal-vet {
+  width: 100%;
+  max-width: 440px;
+  background-color: #fff;
+  border-radius: var(--vet-radio);
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  animation: aparecer 0.25s ease-out;
+}
+
+.modal-vet-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background-color: var(--vet-aviso-fondo);
+  color: var(--vet-aviso);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.modal-vet-titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.modal-vet-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.modal-vet-acciones .btn {
+  padding: 0.7rem 1.6rem;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- 10. Pie de página ---------- */
+.pie {
+  background-color: #fff;
+  border-top: 1px solid var(--vet-borde);
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
+
+.pie-logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--vet-azul);
+}
+
+.pie-logo svg {
+  color: var(--vet-menta);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 991.98px) {
+  .navbar-vet .navbar-collapse {
+    padding-top: 1rem;
+  }
+
+  .hero-fondo {
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero .btn {
+    width: 100%;
+  }
+
+  .modal-vet-acciones {
+    flex-direction: column-reverse;
+  }
+
+  .solucion,
+  .tarjeta-oscura {
+    padding: 1.5rem;
+  }
+}

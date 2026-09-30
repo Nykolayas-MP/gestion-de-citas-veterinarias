@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle de mascota | VetCitas</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendors/boldo/theme.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-vet sticky-top" aria-label="Navegación principal">
+      <div class="container">
+        <a class="navbar-brand" href="index.html"><i class="fa-solid fa-paw logo-icono"></i> VetCitas</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav-principal" aria-controls="nav-principal" aria-expanded="false" aria-label="Abrir menú">
+          <i class="fa-solid fa-bars text-white fs-2"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="nav-principal">
+          <ul class="navbar-nav ms-auto align-items-lg-center">
+            <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="citas.html">Citas</a></li>
+            <li class="nav-item"><a class="nav-link" href="mascotas.html">Mascotas</a></li>
+            <li class="nav-item mt-2 mt-lg-0 ms-lg-3"><a class="btn btn-success text-dark px-4 py-2" href="nueva-cita.html">Agendar cita</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="contenido">
+    <div id="mensajes" aria-live="polite"></div>
+
+    <section class="hero hero-pagina">
+      <img class="hero-fondo" src="img/hero-bg.png" alt="">
+      <div class="container position-relative">
+        <h1 class="hero-titulo">Detalle de mascota</h1>
+        <p class="hero-texto mb-0">Información e historial clínico.</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="container">
+        <!-- TODO (Módulo Mascotas): implementar esta vista -->
+        <div class="tarjeta-vet vacio">
+          <p class="mb-0"><i class="fa-solid fa-person-digging me-2"></i>Módulo en construcción.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="container d-md-flex justify-content-between align-items-center text-center text-md-start">
+      <p class="pie-logo mb-2 mb-md-0"><i class="fa-solid fa-paw"></i> VetCitas</p>
+      <p class="mb-0">&copy; <span id="anio-actual"></span> VetCitas · PTEC103 · Diseño basado en <a href="https://themewagon.com/themes/boldo/" target="_blank" rel="noopener">Boldo de ThemeWagon</a></p>
+    </div>
+  </footer>
+
+  <script src="vendors/bootstrap/bootstrap.min.js"></script>
+  <script src="vendors/fontawesome/all.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/validaciones.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
