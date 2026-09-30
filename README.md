@@ -44,7 +44,9 @@ frontend/
 │   ├── data.js           lectura y escritura de datos (localStorage)
 │   ├── validaciones.js   RUT, email, teléfono, fechas y horario de atención
 │   ├── ui.js             mensajes, errores de formulario, modal de confirmación y menú
-│   └── dashboard.js      lógica del inicio
+│   ├── dashboard.js      lógica del inicio
+│   ├── citas.js          listado de citas: filtros, búsqueda y cancelación
+│   └── nueva-cita.js     formulario para agendar o modificar una cita
 └── vendors/              código de terceros, no se toca
     ├── boldo/            CSS de la plantilla Boldo (trae Bootstrap 5)
     ├── bootstrap/        JavaScript de Bootstrap, para el menú en celular

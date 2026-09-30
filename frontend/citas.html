@@ -44,9 +44,59 @@
 
     <section class="seccion">
       <div class="container">
-        <!-- TODO (Módulo Citas): implementar esta vista -->
-        <div class="tarjeta-vet vacio">
-          <p class="mb-0"><i class="fa-solid fa-person-digging me-2"></i>Módulo en construcción.</p>
+        <!-- Filtros -->
+        <form id="form-filtros" class="tarjeta-vet filtros mb-4" role="search" aria-label="Filtrar citas">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+              <label class="form-label" for="filtro-texto">Buscar</label>
+              <input type="search" id="filtro-texto" class="form-control" placeholder="Nombre de la mascota o del dueño" autocomplete="off">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label" for="filtro-estado">Estado</label>
+              <select id="filtro-estado" class="form-select">
+                <option value="todas">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="atendida">Atendida</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label class="form-label" for="filtro-fecha">Fecha</label>
+              <input type="date" id="filtro-fecha" class="form-control">
+            </div>
+            <div class="col-md-1 d-grid">
+              <button type="reset" class="btn-icono" title="Limpiar filtros" aria-label="Limpiar filtros"><i class="fa-solid fa-rotate-left"></i></button>
+            </div>
+          </div>
+          <div class="chips mt-3" id="chips-rango" role="group" aria-label="Rango de fechas">
+            <button type="button" class="chip activo" data-rango="todas" aria-pressed="true">Todas</button>
+            <button type="button" class="chip" data-rango="hoy" aria-pressed="false">Hoy</button>
+            <button type="button" class="chip" data-rango="proximas" aria-pressed="false">Próximas</button>
+            <button type="button" class="chip" data-rango="pasadas" aria-pressed="false">Pasadas</button>
+          </div>
+        </form>
+
+        <!-- Resultado -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+          <p id="contador-citas" class="mb-0" aria-live="polite"></p>
+          <a href="nueva-cita.html" class="btn btn-dark px-4 py-2"><i class="fa-solid fa-plus me-2"></i>Nueva cita</a>
+        </div>
+
+        <div class="tabla-vet">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Mascota</th>
+                <th scope="col">Dueño</th>
+                <th scope="col">Motivo</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-citas"></tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -64,5 +114,6 @@
   <script src="js/data.js"></script>
   <script src="js/validaciones.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/citas.js"></script>
 </body>
 </html>

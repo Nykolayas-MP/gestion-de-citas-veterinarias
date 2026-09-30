@@ -12,7 +12,7 @@
    Modelo de datos:
      Dueño    { id, nombre, rut, telefono, email }
      Mascota  { id, nombre, especie, raza, edad, duenoId }
-     Cita     { id, mascotaId, fecha, hora, motivo, estado }
+     Cita     { id, mascotaId, fecha, hora, motivo, observaciones, estado }
                 estado: "pendiente" | "atendida" | "cancelada"
      Atención { id, citaId, mascotaId, fecha, diagnostico,
                 tratamiento, medicamentos }

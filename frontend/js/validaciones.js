@@ -56,6 +56,11 @@ function esFechaNoPasada(fecha) {
   return fecha >= fechaLocalISO();
 }
 
+// La clínica atiende de lunes a sábado. getDay() devuelve 0 para domingo.
+function esDiaHabil(fecha) {
+  return new Date(`${fecha}T00:00:00`).getDay() !== 0;
+}
+
 // La hora ("HH:MM") está dentro del horario de atención de la clínica.
 function esHoraEnHorario(hora) {
   return hora >= HORARIO_APERTURA && hora < HORARIO_CIERRE;

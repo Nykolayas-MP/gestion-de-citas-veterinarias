@@ -126,6 +126,17 @@ function formatearFecha(fechaISO) {
   return `${dia}-${mes}-${anio}`;
 }
 
+// "2026-10-01" -> "Jueves, 1 de octubre de 2026"
+function formatearFechaLarga(fechaISO) {
+  const texto = new Date(`${fechaISO}T00:00:00`).toLocaleDateString("es-CL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
 // Devuelve el HTML de la etiqueta de color según el estado de la cita.
 function etiquetaEstado(estado) {
   const texto = estado.charAt(0).toUpperCase() + estado.slice(1);
