@@ -6,12 +6,12 @@
    estilos creados por el grupo para los componentes que la
    plantilla no trae.
 
-   1. Variables            6. Tablas y etiquetas de estado
-   2. Base                 7. Formularios
-   3. Menú                 8. Mensajes (alertas flotantes)
-   4. Banner (hero)        9. Modal de confirmación
-   5. Tarjetas            10. Pie de página
-                          11. Módulo Citas
+   1. Variables                       7. Formularios
+   2. Base                            8. Mensajes (alertas flotantes)
+   3. Menú                            9. Modal de confirmación
+   4. Banner (hero)                  10. Pie de página
+   5. Tarjetas                       11. Módulo Citas
+   6. Tablas y etiquetas de estado   12. Módulo Mascotas
    ========================================================= */
 
 /* ---------- 1. Variables (colores de la plantilla Boldo) ---------- */
@@ -823,4 +823,52 @@ section.seccion {
   .resumen dd {
     text-align: left;
   }
+}
+
+/* ---------- 12. Módulo Mascotas ---------- */
+
+/* Deja espacio para el menú fijo al bajar hasta un formulario. */
+#registro,
+#form-editar,
+#form-atencion {
+  scroll-margin-top: 6rem;
+}
+
+/* Ficha: el resumen ocupa todo el ancho de su tarjeta. */
+#seccion-ficha .resumen {
+  max-width: none;
+}
+
+/* Correos o nombres largos no se salen de la tarjeta del dueño. */
+#seccion-ficha .lista-check span {
+  overflow-wrap: anywhere;
+}
+
+/* Historial clínico */
+.atencion {
+  height: auto;
+  margin-bottom: 1rem;
+  border-left: 5px solid var(--vet-menta);
+}
+
+.atencion-titulo {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.atencion-datos dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--vet-azul);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.atencion-datos dd {
+  margin-bottom: 0.75rem;
+}
+
+.atencion-datos dd:last-child {
+  margin-bottom: 0;
 }
