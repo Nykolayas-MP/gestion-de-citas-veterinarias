@@ -44,10 +44,121 @@
 
     <section class="seccion">
       <div class="container">
-        <!-- TODO (Módulo Mascotas): implementar esta vista -->
-        <div class="tarjeta-vet vacio">
-          <p class="mb-0"><i class="fa-solid fa-person-digging me-2"></i>Módulo en construcción.</p>
+        <!-- Buscador -->
+        <form id="form-buscar" class="tarjeta-vet filtros mb-4" role="search" aria-label="Buscar mascotas">
+          <label class="form-label" for="buscar-texto">Buscar</label>
+          <input type="search" id="buscar-texto" class="form-control" placeholder="Nombre de la mascota, del dueño o RUT" autocomplete="off">
+        </form>
+
+        <!-- Listado -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+          <p id="contador-mascotas" class="mb-0" aria-live="polite"></p>
+          <a href="#registro" class="btn btn-dark px-4 py-2"><i class="fa-solid fa-plus me-2"></i>Registrar mascota</a>
         </div>
+
+        <div class="tabla-vet">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Mascota</th>
+                <th scope="col">Raza</th>
+                <th scope="col">Edad</th>
+                <th scope="col">Dueño</th>
+                <th scope="col">Teléfono</th>
+                <th scope="col" class="text-end">Ficha</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-mascotas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Registro de mascota -->
+    <section class="seccion pt-0" id="registro" aria-labelledby="titulo-registro">
+      <div class="container">
+        <h2 id="titulo-registro" class="titulo-seccion">Registrar mascota</h2>
+
+        <form id="form-mascota" class="tarjeta-vet formulario-cita" novalidate>
+          <p class="texto-suave mb-4">Los campos marcados con <span class="requerido">*</span> son obligatorios.</p>
+
+          <fieldset>
+            <legend class="leyenda"><i class="fa-solid fa-user me-2"></i>Dueño</legend>
+            <div class="mb-3">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="tipoDueno" id="dueno-existente" value="existente" checked>
+                <label class="form-check-label" for="dueno-existente">Dueño registrado</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="tipoDueno" id="dueno-nuevo" value="nuevo">
+                <label class="form-check-label" for="dueno-nuevo">Dueño nuevo</label>
+              </div>
+            </div>
+            <div class="row g-3" id="grupo-dueno-existente">
+              <div class="col-md-6">
+                <label class="form-label" for="dueno">Dueño <span class="requerido">*</span></label>
+                <select id="dueno" name="dueno" class="form-select">
+                  <option value="">Selecciona un dueño</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-3 d-none" id="grupo-dueno-nuevo">
+              <div class="col-md-6">
+                <label class="form-label" for="dueno-nombre">Nombre completo <span class="requerido">*</span></label>
+                <input type="text" id="dueno-nombre" name="duenoNombre" class="form-control" maxlength="60" placeholder="Ej: Camila Rojas" autocomplete="name">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="dueno-rut">RUT <span class="requerido">*</span></label>
+                <input type="text" id="dueno-rut" name="duenoRut" class="form-control" maxlength="12" placeholder="Ej: 12.345.678-5">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="dueno-telefono">Teléfono <span class="requerido">*</span></label>
+                <input type="tel" id="dueno-telefono" name="duenoTelefono" class="form-control" maxlength="16" placeholder="Ej: +56 9 1234 5678" autocomplete="tel">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="dueno-email">Correo electrónico <span class="requerido">*</span></label>
+                <input type="email" id="dueno-email" name="duenoEmail" class="form-control" maxlength="80" placeholder="Ej: camila@mail.com" autocomplete="email">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend class="leyenda"><i class="fa-solid fa-paw me-2"></i>Mascota</legend>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="nombre">Nombre <span class="requerido">*</span></label>
+                <input type="text" id="nombre" name="nombre" class="form-control" maxlength="30" placeholder="Ej: Luna">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="especie">Especie <span class="requerido">*</span></label>
+                <select id="especie" name="especie" class="form-select">
+                  <option value="">Selecciona una especie</option>
+                  <option>Perro</option>
+                  <option>Gato</option>
+                  <option>Conejo</option>
+                  <option>Hámster</option>
+                  <option>Ave</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="raza">Raza <span class="requerido">*</span></label>
+                <input type="text" id="raza" name="raza" class="form-control" maxlength="30" placeholder="Ej: Labrador o Mestizo">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="edad">Edad (años) <span class="requerido">*</span></label>
+                <input type="number" id="edad" name="edad" class="form-control" min="0" max="30" step="1" placeholder="Ej: 4">
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="formulario-acciones">
+            <button type="reset" class="btn btn-outline-dark px-4 py-2">Limpiar</button>
+            <button type="submit" class="btn btn-success text-dark px-4 py-2">
+              <i class="fa-solid fa-floppy-disk me-2"></i><span>Registrar mascota</span>
+            </button>
+          </div>
+        </form>
       </div>
     </section>
   </main>
@@ -64,5 +175,6 @@
   <script src="js/data.js"></script>
   <script src="js/validaciones.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/mascotas.js"></script>
 </body>
 </html>
