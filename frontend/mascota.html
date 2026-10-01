@@ -37,16 +37,151 @@
     <section class="hero hero-pagina">
       <img class="hero-fondo" src="img/hero-bg.png" alt="">
       <div class="container position-relative">
-        <h1 class="hero-titulo">Detalle de mascota</h1>
-        <p class="hero-texto mb-0">Información e historial clínico.</p>
+        <h1 class="hero-titulo" id="titulo-pagina">Detalle de mascota</h1>
+        <p class="hero-texto mb-0" id="subtitulo-pagina">Información e historial clínico.</p>
       </div>
     </section>
 
     <section class="seccion">
       <div class="container">
-        <!-- TODO (Módulo Mascotas): implementar esta vista -->
-        <div class="tarjeta-vet vacio">
-          <p class="mb-0"><i class="fa-solid fa-person-digging me-2"></i>Módulo en construcción.</p>
+        <!-- Ficha -->
+        <div id="seccion-ficha">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <a href="mascotas.html" class="btn btn-outline-dark px-4 py-2"><i class="fa-solid fa-arrow-left me-2"></i>Volver</a>
+            <div class="d-flex flex-wrap gap-3">
+              <a href="nueva-cita.html" id="btn-agendar" class="btn btn-success text-dark px-4 py-2"><i class="fa-solid fa-calendar-plus me-2"></i>Agendar cita</a>
+              <button type="button" id="btn-editar" class="btn btn-outline-dark px-4 py-2"><i class="fa-solid fa-pen me-2"></i>Editar</button>
+              <button type="button" id="btn-eliminar" class="btn btn-outline-danger px-4 py-2"><i class="fa-solid fa-trash me-2"></i>Eliminar</button>
+            </div>
+          </div>
+
+          <div class="row g-4 mb-5">
+            <div class="col-lg-7">
+              <article class="tarjeta-vet">
+                <h2 class="titulo-seccion"><i class="fa-solid fa-paw me-2"></i>Datos de la mascota</h2>
+                <dl class="resumen">
+                  <div><dt>Nombre</dt><dd id="dato-nombre"></dd></div>
+                  <div><dt>Especie</dt><dd id="dato-especie"></dd></div>
+                  <div><dt>Raza</dt><dd id="dato-raza"></dd></div>
+                  <div><dt>Edad</dt><dd id="dato-edad"></dd></div>
+                </dl>
+              </article>
+            </div>
+            <div class="col-lg-5">
+              <aside class="tarjeta-vet tarjeta-oscura" aria-labelledby="titulo-dueno">
+                <h2 class="titulo-tarjeta" id="titulo-dueno"><i class="fa-solid fa-user me-2"></i>Dueño</h2>
+                <ul class="lista-check lista-check-compacta">
+                  <li><i class="fa-solid fa-user"></i> <span id="dueno-nombre"></span></li>
+                  <li><i class="fa-solid fa-id-card"></i> <span id="dueno-rut"></span></li>
+                  <li><i class="fa-solid fa-phone"></i> <span id="dueno-telefono"></span></li>
+                  <li><i class="fa-solid fa-envelope"></i> <span id="dueno-email"></span></li>
+                </ul>
+              </aside>
+            </div>
+          </div>
+
+          <!-- Edición de la mascota -->
+          <form id="form-editar" class="tarjeta-vet formulario-cita mb-5 d-none" novalidate>
+            <h2 class="titulo-seccion">Editar mascota</h2>
+            <p class="texto-suave mb-4">Los campos marcados con <span class="requerido">*</span> son obligatorios.</p>
+            <fieldset>
+              <legend class="leyenda"><i class="fa-solid fa-paw me-2"></i>Mascota</legend>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="nombre">Nombre <span class="requerido">*</span></label>
+                  <input type="text" id="nombre" name="nombre" class="form-control" maxlength="30">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="especie">Especie <span class="requerido">*</span></label>
+                  <select id="especie" name="especie" class="form-select">
+                    <option value="">Selecciona una especie</option>
+                    <option>Perro</option>
+                    <option>Gato</option>
+                    <option>Conejo</option>
+                    <option>Hámster</option>
+                    <option>Ave</option>
+                    <option>Otro</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="raza">Raza <span class="requerido">*</span></label>
+                  <input type="text" id="raza" name="raza" class="form-control" maxlength="30">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="edad">Edad (años) <span class="requerido">*</span></label>
+                  <input type="number" id="edad" name="edad" class="form-control" min="0" max="30" step="1">
+                </div>
+              </div>
+            </fieldset>
+            <div class="formulario-acciones">
+              <button type="button" id="btn-cancelar-edicion" class="btn btn-outline-dark px-4 py-2">Cancelar</button>
+              <button type="submit" class="btn btn-success text-dark px-4 py-2">
+                <i class="fa-solid fa-floppy-disk me-2"></i><span>Guardar cambios</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Historial clínico -->
+          <h2 class="titulo-seccion"><i class="fa-solid fa-notes-medical me-2"></i>Historial clínico</h2>
+          <div id="lista-atenciones" class="mb-5"></div>
+
+          <!-- Citas -->
+          <h2 class="titulo-seccion"><i class="fa-solid fa-calendar-days me-2"></i>Citas</h2>
+          <div class="tabla-vet mb-4">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Hora</th>
+                  <th scope="col">Motivo</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col" class="text-end">Atención</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-citas"></tbody>
+            </table>
+          </div>
+
+          <!-- Registro de atención -->
+          <form id="form-atencion" class="tarjeta-vet formulario-cita d-none" novalidate>
+            <h2 class="titulo-seccion">Registrar atención</h2>
+            <p class="mb-4" id="atencion-cita"></p>
+            <fieldset>
+              <legend class="leyenda"><i class="fa-solid fa-stethoscope me-2"></i>Resultado de la consulta</legend>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label" for="diagnostico">Diagnóstico <span class="requerido">*</span></label>
+                  <textarea id="diagnostico" name="diagnostico" class="form-control" rows="3" maxlength="300"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="tratamiento">Tratamiento <span class="requerido">*</span></label>
+                  <textarea id="tratamiento" name="tratamiento" class="form-control" rows="3" maxlength="300"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="medicamentos">Medicamentos</label>
+                  <input type="text" id="medicamentos" name="medicamentos" class="form-control" maxlength="150" placeholder="Déjalo en blanco si no se recetaron">
+                </div>
+              </div>
+            </fieldset>
+            <div class="formulario-acciones">
+              <button type="button" id="btn-cancelar-atencion" class="btn btn-outline-dark px-4 py-2">Cancelar</button>
+              <button type="submit" class="btn btn-success text-dark px-4 py-2">
+                <i class="fa-solid fa-floppy-disk me-2"></i><span>Guardar atención</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Aviso cuando la mascota no existe -->
+        <div class="row d-none" id="seccion-aviso">
+          <div class="col-lg-8 mx-auto">
+            <div class="tarjeta-vet confirmacion">
+              <span class="confirmacion-icono confirmacion-icono-aviso"><i class="fa-solid fa-triangle-exclamation"></i></span>
+              <h2 class="confirmacion-titulo">Mascota no encontrada</h2>
+              <p class="mb-4">No encontramos la mascota que buscas. Puede que se haya eliminado.</p>
+              <a href="mascotas.html" class="btn btn-dark px-4 py-2">Volver a Mascotas</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -64,5 +199,6 @@
   <script src="js/data.js"></script>
   <script src="js/validaciones.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/mascota.js"></script>
 </body>
 </html>
