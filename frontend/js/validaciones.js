@@ -1,12 +1,6 @@
-/* =========================================================
-   validaciones.js — Funciones de validación reutilizables
-   ---------------------------------------------------------
-   Cada función recibe un valor y devuelve true / false.
-   Se usan en los formularios de todos los módulos.
-   ========================================================= */
-
 const HORARIO_APERTURA = "09:00";
 const HORARIO_CIERRE = "19:00";
+const EDAD_MAXIMA = 30; // años, para el registro de mascotas
 
 function esRequerido(valor) {
   return String(valor ?? "").trim() !== "";

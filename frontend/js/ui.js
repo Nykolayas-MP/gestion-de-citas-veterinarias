@@ -1,10 +1,3 @@
-/* =========================================================
-   ui.js — Funciones de interfaz compartidas
-   ---------------------------------------------------------
-   Mensajes, errores de formulario, modal de confirmación,
-   formato de fechas y comportamiento del menú.
-   ========================================================= */
-
 /* ---------- Mensajes / alertas ---------- */
 
 // Muestra un mensaje en el contenedor #mensajes de la página.
@@ -74,6 +67,15 @@ function limpiarErrorCampo(campo) {
 
 function limpiarErroresFormulario(formulario) {
   formulario.querySelectorAll(".is-invalid").forEach(limpiarErrorCampo);
+}
+
+// Crea un <option> para llenar listas desplegables desde JavaScript.
+function crearOpcion(valor, texto, deshabilitada = false) {
+  const opcion = document.createElement("option");
+  opcion.value = valor;
+  opcion.textContent = texto;
+  opcion.disabled = deshabilitada;
+  return opcion;
 }
 
 /* ---------- Modal de confirmación ---------- */
@@ -148,6 +150,32 @@ function escaparHTML(texto) {
   const div = document.createElement("div");
   div.textContent = String(texto ?? "");
   return div.innerHTML;
+}
+
+// Quita tildes y pasa a minúsculas para comparar textos sin importar cómo se escribieron.
+// Ej: normalizar("Muñoz") -> "munoz"
+function normalizar(texto) {
+  return String(texto ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+// Pone en mayúscula la primera letra de cada palabra. Ej: "ana pérez" -> "Ana Pérez"
+function capitalizar(texto) {
+  return texto
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+    .join(" ");
+}
+
+// 0 -> "Menos de 1 año", 1 -> "1 año", 4 -> "4 años"
+function textoEdad(edad) {
+  if (Number(edad) === 0) return "Menos de 1 año";
+  return `${edad} ${Number(edad) === 1 ? "año" : "años"}`;
 }
 
 // Lee un parámetro de la URL. Ej: mascota.html?id=3 -> obtenerParametroURL("id") = "3"

@@ -1,11 +1,3 @@
-/* =========================================================
-   mascotas.js — Listado y registro de mascotas (mascotas.html)
-   ---------------------------------------------------------
-   Muestra todas las mascotas con su dueño, permite buscarlas
-   y registrar una mascota nueva con un dueño existente o nuevo.
-   ========================================================= */
-
-const EDAD_MAXIMA = 30;
 const CAMPOS_DUENO_NUEVO = ["duenoNombre", "duenoRut", "duenoTelefono", "duenoEmail"];
 
 // Referencias a los campos del formulario.
@@ -22,15 +14,6 @@ const campos = {
 };
 
 /* ---------- Utilidades ---------- */
-
-// Quita tildes y pasa a minúsculas para comparar textos sin importar cómo se escribieron.
-function normalizar(texto) {
-  return String(texto ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-}
 
 // Deja el RUT sin puntos ni guion, para comparar RUT escritos con distinto formato.
 function limpiarRut(rut) {
@@ -50,34 +33,12 @@ function formatearTelefono(telefono) {
   return `+56 ${numeros.slice(0, 1)} ${numeros.slice(1, 5)} ${numeros.slice(5)}`;
 }
 
-// Pone en mayúscula la primera letra de cada palabra.
-function capitalizar(texto) {
-  return texto
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
-    .join(" ");
-}
-
 function rutRepetido(rut) {
   return obtenerDuenos().some((d) => limpiarRut(d.rut) === limpiarRut(rut));
 }
 
-function textoEdad(edad) {
-  if (Number(edad) === 0) return "Menos de 1 año";
-  return `${edad} ${Number(edad) === 1 ? "año" : "años"}`;
-}
-
 function esDuenoNuevo() {
   return document.getElementById("dueno-nuevo").checked;
-}
-
-function crearOpcion(valor, texto) {
-  const opcion = document.createElement("option");
-  opcion.value = valor;
-  opcion.textContent = texto;
-  return opcion;
 }
 
 /* ---------- Listado ---------- */

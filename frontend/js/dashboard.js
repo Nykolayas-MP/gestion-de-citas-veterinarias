@@ -1,7 +1,3 @@
-/* =========================================================
-   dashboard.js — Lógica de la página principal (index.html)
-   ========================================================= */
-
 function mostrarFechaHoy() {
   const texto = new Date().toLocaleDateString("es-CL", {
     weekday: "long",

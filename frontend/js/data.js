@@ -1,23 +1,3 @@
-/* =========================================================
-   data.js — Capa de datos del sistema
-   ---------------------------------------------------------
-   Todas las páginas leen y guardan información SOLO a través
-   de las funciones de este archivo.
-
-   Taller 1: los datos se guardan en localStorage.
-   Taller 2: se reemplaza el interior de estas funciones por
-             llamadas fetch() al backend, sin tocar el resto
-             del código.
-
-   Modelo de datos:
-     Dueño    { id, nombre, rut, telefono, email }
-     Mascota  { id, nombre, especie, raza, edad, duenoId }
-     Cita     { id, mascotaId, fecha, hora, motivo, observaciones, estado }
-                estado: "pendiente" | "atendida" | "cancelada"
-     Atención { id, citaId, mascotaId, fecha, diagnostico,
-                tratamiento, medicamentos }
-   ========================================================= */
-
 const CLAVES = {
   duenos: "vet_duenos",
   mascotas: "vet_mascotas",

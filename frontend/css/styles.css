@@ -1,19 +1,3 @@
-/* =========================================================
-   styles.css — Estilos propios de VetCitas
-   ---------------------------------------------------------
-   Se carga DESPUÉS de vendors/boldo/theme.min.css (plantilla
-   Boldo de ThemeWagon, basada en Bootstrap 5). Aquí van los
-   estilos creados por el grupo para los componentes que la
-   plantilla no trae.
-
-   1. Variables                       7. Formularios
-   2. Base                            8. Mensajes (alertas flotantes)
-   3. Menú                            9. Modal de confirmación
-   4. Banner (hero)                  10. Pie de página
-   5. Tarjetas                       11. Módulo Citas
-   6. Tablas y etiquetas de estado   12. Módulo Mascotas
-   ========================================================= */
-
 /* ---------- 1. Variables (colores de la plantilla Boldo) ---------- */
 :root {
   --vet-azul: #0a2640;

@@ -1,10 +1,3 @@
-/* =========================================================
-   citas.js — Listado de citas (citas.html)
-   ---------------------------------------------------------
-   Muestra todas las citas en una tabla, permite filtrarlas
-   por texto, estado, fecha y rango, y cancelar las pendientes.
-   ========================================================= */
-
 // Estado actual de los filtros. La tabla se dibuja a partir de este objeto.
 const filtros = {
   texto: "",
@@ -14,15 +7,6 @@ const filtros = {
 };
 
 /* ---------- Datos ---------- */
-
-// Quita tildes y pasa a minúsculas para que "Muñoz" y "munoz" coincidan.
-function normalizar(texto) {
-  return String(texto ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-}
 
 // Une cada cita con su mascota y su dueño para no buscarlos varias veces.
 function obtenerCitasConDetalle() {

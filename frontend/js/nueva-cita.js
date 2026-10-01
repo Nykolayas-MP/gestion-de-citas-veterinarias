@@ -1,11 +1,3 @@
-/* =========================================================
-   nueva-cita.js — Formulario para agendar o modificar citas
-   ---------------------------------------------------------
-   nueva-cita.html            -> agenda una cita nueva
-   nueva-cita.html?id=3       -> modifica la cita 3
-   nueva-cita.html?mascota=2  -> agenda con la mascota 2 ya elegida
-   ========================================================= */
-
 const MOTIVOS = [
   "Consulta general",
   "Vacunación",
@@ -97,14 +89,6 @@ function citaDeMascotaEseDia(mascotaId, fecha) {
 }
 
 /* ---------- Llenado de listas desplegables ---------- */
-
-function crearOpcion(valor, texto, deshabilitada = false) {
-  const opcion = document.createElement("option");
-  opcion.value = valor;
-  opcion.textContent = texto;
-  opcion.disabled = deshabilitada;
-  return opcion;
-}
 
 function llenarDuenos() {
   const duenos = obtenerDuenos().sort((a, b) => a.nombre.localeCompare(b.nombre));

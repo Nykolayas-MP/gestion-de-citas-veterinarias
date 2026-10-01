@@ -1,12 +1,3 @@
-/* =========================================================
-   mascota.js — Ficha de una mascota (mascota.html?id=N)
-   ---------------------------------------------------------
-   Muestra los datos de la mascota y de su dueño, el historial
-   clínico y sus citas. Permite registrar la atención de una
-   cita, editar los datos de la mascota y eliminarla.
-   ========================================================= */
-
-const EDAD_MAXIMA = 30;
 const MIN_CARACTERES_ATENCION = 5;
 const CAMPOS_EDICION = ["nombre", "especie", "raza", "edad"];
 const CAMPOS_ATENCION = ["diagnostico", "tratamiento", "medicamentos"];
@@ -29,30 +20,6 @@ const campos = {
 };
 
 /* ---------- Utilidades ---------- */
-
-// Quita tildes y pasa a minúsculas para comparar textos sin importar cómo se escribieron.
-function normalizar(texto) {
-  return String(texto ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-// Pone en mayúscula la primera letra de cada palabra.
-function capitalizar(texto) {
-  return texto
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
-    .join(" ");
-}
-
-function textoEdad(edad) {
-  if (Number(edad) === 0) return "Menos de 1 año";
-  return `${edad} ${Number(edad) === 1 ? "año" : "años"}`;
-}
 
 // Solo se registra la atención de una cita pendiente cuya fecha ya llegó.
 function puedeAtenderse(cita) {

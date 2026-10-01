@@ -22,14 +22,14 @@ Cuatro entidades, relacionadas en cadena:
 |----------|--------------------------------------------------------------|-------------------------|
 | Dueño    | nombre, RUT, teléfono, email                                 | tiene una o más mascotas |
 | Mascota  | nombre, especie, raza, edad                                  | pertenece a un dueño    |
-| Cita     | fecha, hora, motivo, estado (pendiente, atendida o cancelada) | pertenece a una mascota |
+| Cita     | fecha, hora, motivo, observaciones, estado (pendiente, atendida o cancelada) | pertenece a una mascota |
 | Atención | diagnóstico, tratamiento, medicamentos                       | sale de una cita        |
 
 ## Taller 1: frontend
 
 Todo está hecho con HTML5, CSS y JavaScript, sin backend todavía.
 
-La página de **inicio** (`index.html`) presenta el sistema y explica por qué existe. En **Citas** (`citas.html`) se ve el listado con filtros por fecha y estado, y desde ahí se puede editar o cancelar. **Agendar cita** (`nueva-cita.html`) es el formulario para reservar o modificar una hora. **Mascotas** (`mascotas.html`) lista las mascotas y permite registrar un dueño nuevo con su mascota. Y la ficha de cada mascota (`mascota.html`) muestra su historial clínico y deja registrar una atención.
+La página de **inicio** (`index.html`) presenta el sistema y explica por qué existe. En **Citas** (`citas.html`) se ve el listado con filtros por fecha y estado, y desde ahí se puede editar o cancelar. **Agendar cita** (`nueva-cita.html`) es el formulario para reservar o modificar una hora. **Mascotas** (`mascotas.html`) lista las mascotas con un buscador y permite registrar una mascota, con un dueño que ya existe o con uno nuevo. Y la ficha de cada mascota (`mascota.html`) muestra sus datos, los de su dueño, su historial clínico y sus citas. Desde la ficha se registra la atención de una cita, y también se puede editar o eliminar la mascota.
 
 Nos dividimos el trabajo por módulos. Uno se encarga de Citas y Agendar; la otra, de Mascotas y la ficha clínica. El inicio y los archivos compartidos los armamos entre los dos.
 
@@ -42,11 +42,13 @@ frontend/
 ├── img/                  favicon, fondo del banner e imagen del inicio
 ├── js/
 │   ├── data.js           lectura y escritura de datos (localStorage)
-│   ├── validaciones.js   RUT, email, teléfono, fechas y horario de atención
-│   ├── ui.js             mensajes, errores de formulario, modal de confirmación y menú
+│   ├── validaciones.js   RUT, email, teléfono, edad, fechas y horario de atención
+│   ├── ui.js             mensajes, errores de formulario, modal, menú y funciones de texto
 │   ├── dashboard.js      lógica del inicio
 │   ├── citas.js          listado de citas: filtros, búsqueda y cancelación
-│   └── nueva-cita.js     formulario para agendar o modificar una cita
+│   ├── nueva-cita.js     formulario para agendar o modificar una cita
+│   ├── mascotas.js       listado de mascotas y registro con su dueño
+│   └── mascota.js        ficha: historial, atención, edición y eliminación
 └── vendors/              código de terceros, no se toca
     ├── boldo/            CSS de la plantilla Boldo (trae Bootstrap 5)
     ├── bootstrap/        JavaScript de Bootstrap, para el menú en celular
@@ -58,6 +60,10 @@ El diseño parte de la plantilla gratuita [Boldo de ThemeWagon](https://themewag
 ### Una decisión que vale la pena explicar
 
 Ninguna página toca `localStorage` directamente. Todas pasan por las funciones de `data.js`, como `obtenerCitas()` o `crearCita()`. Parece un paso extra, pero nos ahorra trabajo después. En el Taller 2 solo vamos a cambiar el interior de esas funciones por llamadas `fetch()` al backend, y el resto del código queda igual.
+
+Lo mismo pasa con el código que se repite. Las validaciones viven en `validaciones.js` y las funciones de interfaz en `ui.js`, como mostrar mensajes, marcar errores o quitar tildes para buscar. Cada módulo las usa sin copiarlas.
+
+Las páginas de detalle reciben el dato que necesitan por la URL. `mascota.html?id=3` abre la ficha de la mascota 3, `nueva-cita.html?id=5` abre la cita 5 para modificarla, y `nueva-cita.html?mascota=3` abre el formulario con esa mascota ya elegida. Así una sola página sirve para todas las mascotas y todas las citas.
 
 ### Cómo abrirlo
 
