@@ -69,6 +69,24 @@ function limpiarErroresFormulario(formulario) {
   formulario.querySelectorAll(".is-invalid").forEach(limpiarErrorCampo);
 }
 
+// Muestra un error del servidor (ErrorApi). Cada mensaje por campo se marca
+// bajo su campo; "campos" relaciona el nombre que usa el servidor con el elemento.
+// Ej: mostrarErroresServidor(error, { mascotaId: campos.mascota, fecha: campos.fecha })
+function mostrarErroresServidor(error, campos = {}) {
+  const errores = error.errores || {};
+  let primerCampo = null;
+
+  Object.entries(errores).forEach(([nombre, texto]) => {
+    const campo = campos[nombre];
+    if (!campo) return;
+    mostrarErrorCampo(campo, texto);
+    if (!primerCampo) primerCampo = campo;
+  });
+
+  if (primerCampo) primerCampo.focus();
+  mostrarMensaje(error.message || "Ocurrió un error inesperado.", "error");
+}
+
 // Crea un <option> para llenar listas desplegables desde JavaScript.
 function crearOpcion(valor, texto, deshabilitada = false) {
   const opcion = document.createElement("option");

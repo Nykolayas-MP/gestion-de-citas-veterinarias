@@ -76,3 +76,56 @@ python -m http.server 5500 --directory frontend
 y entrar a <http://localhost:5500>.
 
 La primera vez se cargan datos de ejemplo: tres dueños, cuatro mascotas y algunas citas. Para volver a ese estado, escribe `reiniciarDatos()` en la consola del navegador.
+
+## Taller 2: backend
+
+El servidor está hecho solo con Node.js, sin Express ni ninguna otra librería. Así lo pidió el profesor, y la verdad es que nos sirvió: tuvimos que escribir a mano lo que un framework esconde, como decidir qué función atiende cada URL o juntar los datos que llegan desde un formulario.
+
+Los datos viven en memoria mientras el servidor está encendido. Al apagarlo se pierden y al volver a encenderlo parte con los datos de ejemplo. La base de datos llega en el Taller 3.
+
+### Cómo encenderlo
+
+Hace falta tener Node.js 18 o más nuevo. Desde la carpeta `backend`:
+
+```bash
+npm start
+```
+
+y entrar a <http://localhost:3000>. El mismo servidor entrega las páginas y responde la API, así que no hace falta Live Server. Mientras se programa conviene usar `npm run dev`, que reinicia el servidor solo cada vez que se guarda un archivo.
+
+En la consola aparece cada petición con su resultado, por ejemplo `GET /api/citas → 200`.
+
+### Cómo está organizado
+
+```
+backend/
+├── server.js             recibe cada petición: si empieza con /api la atiende una ruta,
+│                         si no, entrega el archivo del frontend
+├── validaciones.js       las mismas reglas del frontend, revisadas otra vez en el servidor
+├── datos/
+│   ├── datos-iniciales.js    datos de ejemplo
+│   └── almacen.js            listas en memoria: listar, buscar, insertar, actualizar, eliminar
+├── rutas/                una por entidad: citas, dueños, mascotas y atenciones
+└── utilidades/
+    ├── enrutador.js      decide qué función atiende cada método y URL
+    ├── http.js           lee los datos que llegan y arma las respuestas JSON
+    ├── archivos.js       entrega las páginas del frontend
+    └── fechas.js
+```
+
+Del lado del navegador, `data.js` tiene la función `api()`, que envía la petición con `fetch()` y devuelve la respuesta. Si el servidor rechaza los datos, `mostrarErroresServidor()` (en `ui.js`) marca cada error bajo su campo, igual que las validaciones del navegador.
+
+Validamos dos veces a propósito. El navegador avisa rápido mientras se llena el formulario, pero cualquiera puede saltárselo y llamar a la API directamente, así que el servidor no confía en nada de lo que recibe.
+
+### Respuestas de la API
+
+Las respuestas siempre vienen en JSON. Cuando algo sale mal, el código HTTP dice qué pasó y el cuerpo trae el detalle:
+
+```json
+{
+  "error": "Revisa los datos de la cita.",
+  "errores": { "fecha": "La clínica no atiende los domingos." }
+}
+```
+
+Usamos `400` cuando los datos vienen mal, `404` cuando lo que se busca no existe, `405` cuando la URL existe pero no con ese método, `409` cuando hay un choque (un horario ya tomado o un RUT repetido) y `500` si algo falla dentro del servidor.

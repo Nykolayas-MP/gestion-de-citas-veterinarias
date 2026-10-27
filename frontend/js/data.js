@@ -25,6 +25,42 @@ function fechaRelativa(dias) {
   return fechaLocalISO(fecha);
 }
 
+/* ---------- Comunicación con el servidor (Taller 2) ---------- */
+
+// Error que devuelve el servidor. "errores" trae un mensaje por campo
+// del formulario, por ejemplo: { fecha: "La clínica no atiende los domingos." }
+class ErrorApi extends Error {
+  constructor(estado, mensaje, errores = {}) {
+    super(mensaje);
+    this.estado = estado;
+    this.errores = errores || {};
+  }
+}
+
+// Envía una petición a la API y devuelve los datos de la respuesta.
+// Ej: await api("GET", "/citas")   await api("POST", "/citas", { fecha: "...", ... })
+// Si el servidor responde con error, lanza un ErrorApi.
+async function api(metodo, ruta, datos) {
+  const opciones = { method: metodo, headers: {} };
+  if (datos !== undefined) {
+    opciones.headers["Content-Type"] = "application/json";
+    opciones.body = JSON.stringify(datos);
+  }
+
+  let respuesta;
+  try {
+    respuesta = await fetch(`/api${ruta}`, opciones);
+  } catch {
+    throw new ErrorApi(0, "No se pudo conectar con el servidor. Revisa que esté encendido.");
+  }
+
+  const cuerpo = await respuesta.json().catch(() => ({}));
+  if (!respuesta.ok) {
+    throw new ErrorApi(respuesta.status, cuerpo.error || "Ocurrió un error en el servidor.", cuerpo.errores);
+  }
+  return cuerpo;
+}
+
 /* ---------- Lectura / escritura genérica ---------- */
 
 function leerColeccion(clave) {
