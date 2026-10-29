@@ -7,12 +7,24 @@ const MOTIVOS = [
   "Urgencia",
   "Otro",
 ];
-const DURACION_CITA_MINUTOS = 30;
 const MAX_DIAS_ANTICIPACION = 90;
 const MAX_OBSERVACIONES = 200;
 
 // Cita que se está modificando (null cuando se agenda una nueva).
 let citaEditando = null;
+
+// Datos traídos del servidor al cargar la página.
+let duenos = [];
+let mascotas = [];
+let citas = [];
+
+// Horarios del día elegido, tal como los entrega el servidor:
+// [{ hora: "09:00", disponible: true }, { hora: "09:30", disponible: false, motivo: "ocupado" }, ...]
+let horarios = [];
+
+// Cuenta las veces que se piden horarios. Si el usuario cambia de fecha rápido,
+// permite ignorar la respuesta de una fecha que ya no está elegida.
+let pedidoHoras = 0;
 
 // Referencias a los campos del formulario.
 const campos = {
@@ -25,65 +37,36 @@ const campos = {
   observaciones: document.getElementById("observaciones"),
 };
 
-/* ---------- Utilidades de tiempo ---------- */
-
-function aMinutos(hora) {
-  const [h, m] = hora.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function aHora(minutos) {
-  const h = String(Math.floor(minutos / 60)).padStart(2, "0");
-  const m = String(minutos % 60).padStart(2, "0");
-  return `${h}:${m}`;
-}
-
-// Todos los bloques de la jornada: 09:00, 09:30, ..., 18:30
-function generarHorarios() {
-  const horarios = [];
-  const inicio = aMinutos(HORARIO_APERTURA);
-  const fin = aMinutos(HORARIO_CIERRE);
-  for (let minutos = inicio; minutos < fin; minutos += DURACION_CITA_MINUTOS) {
-    horarios.push(aHora(minutos));
-  }
-  return horarios;
-}
-
-function horaActual() {
-  const ahora = new Date();
-  return aHora(ahora.getHours() * 60 + ahora.getMinutes());
-}
-
 function fechaMaxima() {
   return fechaRelativa(MAX_DIAS_ANTICIPACION);
 }
 
+function buscarMascota(id) {
+  return mascotas.find((m) => m.id === Number(id)) || null;
+}
+
+/* ---------- Datos ---------- */
+
+// Las tres listas se piden al mismo tiempo para no esperar una tras otra.
+async function cargarDatos() {
+  [duenos, mascotas, citas] = await Promise.all([
+    api("GET", "/duenos"),
+    api("GET", "/mascotas"),
+    api("GET", "/citas?estado=pendiente"),
+  ]);
+}
+
 /* ---------- Reglas de negocio ---------- */
 
-// Citas que bloquean un horario: todas menos las canceladas
-// y menos la que se está modificando.
-function citasActivasDelDia(fecha) {
-  return obtenerCitas().filter(
-    (c) =>
-      c.fecha === fecha &&
-      c.estado !== "cancelada" &&
-      (!citaEditando || c.id !== citaEditando.id)
-  );
-}
-
-function horasOcupadas(fecha) {
-  return citasActivasDelDia(fecha).map((c) => c.hora);
-}
-
-function esHoraPasada(fecha, hora) {
-  return fecha === fechaLocalISO() && hora <= horaActual();
-}
-
 // Otra cita pendiente de la misma mascota ese día (o null).
+// No cuenta la cita que se está modificando.
 function citaDeMascotaEseDia(mascotaId, fecha) {
   return (
-    citasActivasDelDia(fecha).find(
-      (c) => c.mascotaId === Number(mascotaId) && c.estado === "pendiente"
+    citas.find(
+      (c) =>
+        c.fecha === fecha &&
+        c.mascotaId === Number(mascotaId) &&
+        (!citaEditando || c.id !== citaEditando.id)
     ) || null
   );
 }
@@ -91,8 +74,8 @@ function citaDeMascotaEseDia(mascotaId, fecha) {
 /* ---------- Llenado de listas desplegables ---------- */
 
 function llenarDuenos() {
-  const duenos = obtenerDuenos().sort((a, b) => a.nombre.localeCompare(b.nombre));
-  duenos.forEach((d) => campos.dueno.appendChild(crearOpcion(d.id, `${d.nombre} (${d.rut})`)));
+  const ordenados = [...duenos].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  ordenados.forEach((d) => campos.dueno.appendChild(crearOpcion(d.id, `${d.nombre} (${d.rut})`)));
 }
 
 function llenarMascotas() {
@@ -105,61 +88,70 @@ function llenarMascotas() {
     return;
   }
 
-  const mascotas = obtenerMascotasPorDueno(duenoId);
-  if (mascotas.length === 0) {
+  const delDueno = mascotas.filter((m) => m.duenoId === Number(duenoId));
+  if (delDueno.length === 0) {
     campos.mascota.appendChild(crearOpcion("", "Este dueño no tiene mascotas registradas"));
     campos.mascota.disabled = true;
     return;
   }
 
   campos.mascota.appendChild(crearOpcion("", "Selecciona una mascota"));
-  mascotas.forEach((m) =>
+  delDueno.forEach((m) =>
     campos.mascota.appendChild(crearOpcion(m.id, `${m.nombre} · ${m.especie}`))
   );
   campos.mascota.disabled = false;
 
   // Si el dueño tiene una sola mascota, se elige automáticamente.
-  if (mascotas.length === 1) campos.mascota.value = mascotas[0].id;
+  if (delDueno.length === 1) campos.mascota.value = delDueno[0].id;
 }
 
-function llenarHoras() {
+function bloquearHoras(texto) {
+  campos.hora.innerHTML = "";
+  campos.hora.appendChild(crearOpcion("", texto));
+  campos.hora.disabled = true;
+}
+
+// Pide al servidor los horarios del día y llena la lista de horas.
+async function llenarHoras() {
   const fecha = campos.fecha.value;
   const horaElegida = campos.hora.value;
   const ayuda = document.getElementById("ayuda-hora");
-  campos.hora.innerHTML = "";
+  const pedido = ++pedidoHoras;
+  horarios = [];
+  ayuda.textContent = "";
 
   // Sin fecha válida no tiene sentido mostrar horarios.
-  if (!fecha || !esFechaNoPasada(fecha) || !esDiaHabil(fecha)) {
-    campos.hora.appendChild(crearOpcion("", "Primero elige una fecha válida"));
-    campos.hora.disabled = true;
-    ayuda.textContent = "";
+  if (!fecha || !esFechaNoPasada(fecha) || fecha > fechaMaxima() || !esDiaHabil(fecha)) {
+    bloquearHoras("Primero elige una fecha válida");
     return;
   }
 
-  const ocupadas = horasOcupadas(fecha);
-  let disponibles = 0;
+  bloquearHoras("Cargando horarios...");
+  let respuesta;
+  try {
+    const excluir = citaEditando ? `&excluir=${citaEditando.id}` : "";
+    respuesta = await api("GET", `/citas/horarios?fecha=${fecha}${excluir}`);
+  } catch (error) {
+    if (pedido !== pedidoHoras) return;
+    bloquearHoras("No se pudieron cargar los horarios");
+    mostrarMensaje(error.message, "error");
+    return;
+  }
+  if (pedido !== pedidoHoras) return;
 
+  horarios = respuesta;
+  campos.hora.innerHTML = "";
   campos.hora.appendChild(crearOpcion("", "Selecciona una hora"));
-  generarHorarios().forEach((hora) => {
-    let texto = hora;
-    let deshabilitada = false;
-    if (ocupadas.includes(hora)) {
-      texto += " · ocupado";
-      deshabilitada = true;
-    } else if (esHoraPasada(fecha, hora)) {
-      texto += " · ya pasó";
-      deshabilitada = true;
-    } else {
-      disponibles++;
-    }
-    campos.hora.appendChild(crearOpcion(hora, texto, deshabilitada));
+  horarios.forEach((h) => {
+    const texto = h.disponible ? h.hora : `${h.hora} · ${h.motivo}`;
+    campos.hora.appendChild(crearOpcion(h.hora, texto, !h.disponible));
   });
-
   campos.hora.disabled = false;
-  // Mantiene la hora elegida si sigue disponible en la nueva fecha.
-  const opcionPrevia = [...campos.hora.options].find((o) => o.value === horaElegida && !o.disabled);
-  if (opcionPrevia) campos.hora.value = horaElegida;
 
+  // Mantiene la hora elegida si sigue disponible en la nueva fecha.
+  if (horarios.some((h) => h.hora === horaElegida && h.disponible)) campos.hora.value = horaElegida;
+
+  const disponibles = horarios.filter((h) => h.disponible).length;
   ayuda.textContent =
     disponibles === 0
       ? "No quedan horarios disponibles este día."
@@ -173,6 +165,7 @@ function llenarMotivos() {
 /* ---------- Validaciones ---------- */
 
 // Devuelve el mensaje de error del campo, o "" si es válido.
+// El servidor vuelve a revisar todo al guardar.
 function validarCampo(nombre) {
   const valor = campos[nombre].value.trim();
 
@@ -191,7 +184,7 @@ function validarCampo(nombre) {
       if (campos.mascota.value) {
         const otra = citaDeMascotaEseDia(campos.mascota.value, valor);
         if (otra) {
-          const mascota = obtenerMascotaPorId(campos.mascota.value);
+          const mascota = buscarMascota(campos.mascota.value);
           return `${mascota.nombre} ya tiene una cita pendiente ese día a las ${otra.hora}.`;
         }
       }
@@ -201,9 +194,10 @@ function validarCampo(nombre) {
     case "hora": {
       if (!esRequerido(valor)) return "Elige una hora.";
       if (!esHoraEnHorario(valor)) return `Fuera del horario de atención (${HORARIO_APERTURA} a ${HORARIO_CIERRE}).`;
-      const fecha = campos.fecha.value;
-      if (horasOcupadas(fecha).includes(valor)) return "Ese horario ya fue tomado. Elige otro.";
-      if (esHoraPasada(fecha, valor)) return "Esa hora ya pasó.";
+      const horario = horarios.find((h) => h.hora === valor);
+      if (!horario) return "Elige una de las horas de la lista.";
+      if (horario.motivo === "ocupado") return "Ese horario ya fue tomado. Elige otro.";
+      if (horario.motivo === "ya pasó") return "Esa hora ya pasó.";
       return "";
     }
 
@@ -264,9 +258,9 @@ function iniciarEventos() {
     if (campos.fecha.value) aplicarValidacion("fecha");
   });
 
-  campos.fecha.addEventListener("change", () => {
-    llenarHoras();
+  campos.fecha.addEventListener("change", async () => {
     aplicarValidacion("fecha");
+    await llenarHoras();
     if (campos.hora.value) aplicarValidacion("hora");
   });
 
@@ -294,14 +288,20 @@ function iniciarEventos() {
 
 /* ---------- Guardar ---------- */
 
-function guardarCita(evento) {
+async function guardarCita(evento) {
   evento.preventDefault();
+  const boton = document.getElementById("btn-guardar");
+  if (boton.disabled) return;
 
-  // Se vuelve a llenar la lista de horas por si otra pestaña tomó un horario.
-  if (campos.fecha.value) llenarHoras();
+  // Se vuelven a pedir los horarios por si alguien tomó uno mientras se llenaba el formulario.
+  const horaElegida = campos.hora.value;
+  if (campos.fecha.value) await llenarHoras();
 
   // Se validan todos los campos (map, no some, para marcar todos los errores a la vez).
   const resultados = Object.keys(campos).map(aplicarValidacion);
+  if (horaElegida && !campos.hora.value) {
+    mostrarErrorCampo(campos.hora, `La hora ${horaElegida} se acaba de ocupar. Elige otra.`);
+  }
   if (resultados.includes(false)) {
     const primerError = document.querySelector("#form-cita .is-invalid");
     if (primerError) primerError.focus();
@@ -317,13 +317,31 @@ function guardarCita(evento) {
     observaciones: campos.observaciones.value.trim(),
   };
 
-  const cita = citaEditando ? actualizarCita(citaEditando.id, datos) : crearCita(datos);
-  mostrarConfirmacion(cita, Boolean(citaEditando));
+  // El botón se desactiva mientras responde el servidor para no agendar dos veces.
+  boton.disabled = true;
+  try {
+    const cita = citaEditando
+      ? await api("PUT", `/citas/${citaEditando.id}`, datos)
+      : await api("POST", "/citas", datos);
+    mostrarConfirmacion(cita, Boolean(citaEditando));
+  } catch (error) {
+    // 409: otra persona tomó el horario. Se actualiza la lista de horas.
+    if (error.estado === 409 && error.errores.hora) await llenarHoras();
+    mostrarErroresServidor(error, {
+      mascotaId: campos.mascota,
+      fecha: campos.fecha,
+      hora: campos.hora,
+      motivo: campos.motivo.value === "Otro" ? campos.motivoOtro : campos.motivo,
+      observaciones: campos.observaciones,
+    });
+  } finally {
+    boton.disabled = false;
+  }
 }
 
 function mostrarConfirmacion(cita, fueEditada) {
-  const mascota = obtenerMascotaPorId(cita.mascotaId);
-  const dueno = obtenerDuenoPorId(mascota.duenoId);
+  const mascota = buscarMascota(cita.mascotaId);
+  const dueno = duenos.find((d) => d.id === mascota.duenoId);
 
   document.getElementById("confirmacion-titulo").textContent = fueEditada
     ? "¡Cita actualizada!"
@@ -363,17 +381,23 @@ function mostrarAviso(texto) {
 }
 
 function elegirMascota(mascotaId) {
-  const mascota = obtenerMascotaPorId(mascotaId);
+  const mascota = buscarMascota(mascotaId);
   if (!mascota) return;
   campos.dueno.value = mascota.duenoId;
   llenarMascotas();
   campos.mascota.value = mascota.id;
 }
 
-function cargarCitaParaEditar(id) {
-  const cita = obtenerCitaPorId(id);
-  if (!cita) {
-    mostrarAviso("No encontramos la cita que quieres modificar. Puede que se haya eliminado.");
+async function cargarCitaParaEditar(id) {
+  let cita;
+  try {
+    cita = await api("GET", `/citas/${id}`);
+  } catch (error) {
+    if (error.estado === 404) {
+      mostrarAviso("No encontramos la cita que quieres modificar. Puede que se haya eliminado.");
+    } else {
+      mostrarAviso(error.message);
+    }
     return;
   }
   if (cita.estado !== "pendiente") {
@@ -389,7 +413,7 @@ function cargarCitaParaEditar(id) {
 
   elegirMascota(cita.mascotaId);
   campos.fecha.value = cita.fecha;
-  llenarHoras();
+  await llenarHoras();
   campos.hora.value = cita.hora;
 
   if (MOTIVOS.includes(cita.motivo)) {
@@ -411,17 +435,24 @@ function cargarCitaParaEditar(id) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Límites del calendario: desde hoy hasta 90 días más.
   campos.fecha.min = fechaLocalISO();
   campos.fecha.max = fechaMaxima();
 
-  llenarDuenos();
   llenarMotivos();
   iniciarEventos();
 
+  try {
+    await cargarDatos();
+  } catch (error) {
+    mostrarAviso(error.message);
+    return;
+  }
+  llenarDuenos();
+
   const idCita = obtenerParametroURL("id");
   const idMascota = obtenerParametroURL("mascota");
-  if (idCita) cargarCitaParaEditar(idCita);
+  if (idCita) await cargarCitaParaEditar(idCita);
   else if (idMascota) elegirMascota(idMascota);
 });

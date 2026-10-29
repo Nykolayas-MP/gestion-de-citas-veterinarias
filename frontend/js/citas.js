@@ -6,13 +6,27 @@ const filtros = {
   rango: "todas", // "todas" | "hoy" | "proximas" | "pasadas"
 };
 
+// Datos traídos del servidor al cargar la página.
+let citas = [];
+let mascotas = [];
+let duenos = [];
+
 /* ---------- Datos ---------- */
+
+// Las tres listas se piden al mismo tiempo para no esperar una tras otra.
+async function cargarDatos() {
+  [citas, mascotas, duenos] = await Promise.all([
+    api("GET", "/citas"),
+    api("GET", "/mascotas"),
+    api("GET", "/duenos"),
+  ]);
+}
 
 // Une cada cita con su mascota y su dueño para no buscarlos varias veces.
 function obtenerCitasConDetalle() {
-  return obtenerCitas().map((cita) => {
-    const mascota = obtenerMascotaPorId(cita.mascotaId);
-    const dueno = mascota ? obtenerDuenoPorId(mascota.duenoId) : null;
+  return citas.map((cita) => {
+    const mascota = mascotas.find((m) => m.id === cita.mascotaId) || null;
+    const dueno = mascota ? duenos.find((d) => d.id === mascota.duenoId) || null : null;
     return { ...cita, mascota, dueno };
   });
 }
@@ -170,14 +184,14 @@ function iniciarAcciones() {
     const boton = evento.target.closest('[data-accion="cancelar"]');
     if (!boton) return;
 
-    const cita = obtenerCitaPorId(boton.dataset.id);
+    const cita = citas.find((c) => c.id === Number(boton.dataset.id));
     if (!cita || cita.estado !== "pendiente") {
       mostrarMensaje("Esta cita ya no se puede cancelar.", "error");
       mostrarCitas();
       return;
     }
 
-    const mascota = obtenerMascotaPorId(cita.mascotaId);
+    const mascota = mascotas.find((m) => m.id === cita.mascotaId);
     const nombre = mascota ? mascota.nombre : "la mascota";
     const confirmado = await confirmarAccion(
       `¿Cancelar la cita de ${nombre} del ${formatearFecha(cita.fecha)} a las ${cita.hora}? Esta acción no se puede deshacer.`,
@@ -185,14 +199,29 @@ function iniciarAcciones() {
     );
     if (!confirmado) return;
 
-    cancelarCita(cita.id);
-    mostrarCitas();
-    mostrarMensaje(`La cita de ${nombre} fue cancelada.`, "exito");
+    try {
+      const cancelada = await api("PATCH", `/citas/${cita.id}/cancelar`);
+      citas = citas.map((c) => (c.id === cancelada.id ? cancelada : c));
+      mostrarCitas();
+      mostrarMensaje(`La cita de ${nombre} fue cancelada.`, "exito");
+    } catch (error) {
+      mostrarErroresServidor(error);
+      // Si alguien la cambió desde otra pestaña, se vuelve a cargar la lista.
+      if (error.estado === 404 || error.estado === 409) {
+        await cargarDatos();
+        mostrarCitas();
+      }
+    }
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   iniciarFiltros();
   iniciarAcciones();
+  try {
+    await cargarDatos();
+  } catch (error) {
+    mostrarErroresServidor(error);
+  }
   mostrarCitas();
 });
