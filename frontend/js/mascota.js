@@ -8,6 +8,12 @@ let mascota = null;
 // Cita a la que se le está registrando la atención (null si el formulario está cerrado).
 let citaAtendiendo = null;
 
+// Datos traídos del servidor al cargar la página.
+let dueno = null;
+let mascotasDelDueno = [];
+let atenciones = [];
+let citas = [];
+
 // Referencias a los campos de los formularios de edición y de atención.
 const campos = {
   nombre: document.getElementById("nombre"),
@@ -26,11 +32,17 @@ function puedeAtenderse(cita) {
   return cita.estado === "pendiente" && cita.fecha <= fechaLocalISO();
 }
 
+async function cargarDatos(id) {
+  mascota = await api("GET", `/mascotas/${id}`);
+  dueno = await api("GET", `/duenos/${mascota.duenoId}`);
+  mascotasDelDueno = await api("GET", `/mascotas?duenoId=${mascota.duenoId}`);
+  atenciones = await api("GET", `/mascotas/${id}/atenciones`);
+  citas = (await api("GET", `/citas?mascotaId=${id}`)).filter((c) => c.mascotaId === mascota.id);
+}
+
 /* ---------- Datos de la mascota y del dueño ---------- */
 
 function mostrarDatos() {
-  const dueno = obtenerDuenoPorId(mascota.duenoId);
-
   document.title = `${mascota.nombre} | VetCitas`;
   document.getElementById("titulo-pagina").textContent = mascota.nombre;
   document.getElementById("subtitulo-pagina").textContent = `${mascota.especie} · ${mascota.raza}`;
@@ -50,7 +62,7 @@ function mostrarDatos() {
 /* ---------- Historial clínico ---------- */
 
 function tarjetaAtencion(atencion) {
-  const cita = obtenerCitaPorId(atencion.citaId);
+  const cita = citas.find((c) => c.id === atencion.citaId);
   const medicamentos = atencion.medicamentos ? escaparHTML(atencion.medicamentos) : "Sin medicamentos";
 
   return `
@@ -71,18 +83,18 @@ function tarjetaAtencion(atencion) {
 }
 
 function mostrarHistorial() {
-  const atenciones = obtenerAtencionesPorMascota(mascota.id)
+  const ordenadas = [...atenciones]
     .sort((a, b) => b.fecha.localeCompare(a.fecha));
   const lista = document.getElementById("lista-atenciones");
 
-  if (atenciones.length === 0) {
+  if (ordenadas.length === 0) {
     lista.innerHTML = `
       <div class="tarjeta-vet vacio">
         <i class="fa-solid fa-notes-medical fs-3 d-block mb-2"></i>
         Aún no hay atenciones registradas.
       </div>`;
   } else {
-    lista.innerHTML = atenciones.map(tarjetaAtencion).join("");
+    lista.innerHTML = ordenadas.map(tarjetaAtencion).join("");
   }
 }
 
@@ -106,11 +118,11 @@ function filaCita(cita) {
 }
 
 function mostrarCitas() {
-  const citas = obtenerCitasPorMascota(mascota.id)
+  const ordenadas = [...citas]
     .sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora));
   const cuerpo = document.getElementById("tabla-citas");
 
-  if (citas.length === 0) {
+  if (ordenadas.length === 0) {
     cuerpo.innerHTML = `
       <tr>
         <td colspan="5" class="vacio">
@@ -119,7 +131,7 @@ function mostrarCitas() {
         </td>
       </tr>`;
   } else {
-    cuerpo.innerHTML = citas.map(filaCita).join("");
+    cuerpo.innerHTML = ordenadas.map(filaCita).join("");
   }
 }
 
@@ -133,7 +145,7 @@ function validarCampo(nombre) {
     case "nombre": {
       if (!esRequerido(valor)) return "Escribe el nombre de la mascota.";
       if (!esTextoValido(valor)) return "El nombre solo puede tener letras y espacios.";
-      const repetida = obtenerMascotasPorDueno(mascota.duenoId).some(
+      const repetida = mascotasDelDueno.some(
         (m) => m.id !== mascota.id && normalizar(m.nombre) === normalizar(valor)
       );
       if (repetida) return "El dueño ya tiene otra mascota con ese nombre.";
@@ -191,7 +203,7 @@ function validarFormulario(nombres, formulario) {
 /* ---------- Registrar atención ---------- */
 
 function abrirAtencion(citaId) {
-  const cita = obtenerCitaPorId(citaId);
+  const cita = citas.find((c) => c.id === Number(citaId));
   if (!cita || !puedeAtenderse(cita)) {
     mostrarMensaje("A esta cita ya no se le puede registrar una atención.", "error");
     mostrarCitas();
@@ -217,24 +229,28 @@ function cerrarAtencion() {
   formulario.classList.add("d-none");
 }
 
-function guardarAtencion(evento) {
+async function guardarAtencion(evento) {
   evento.preventDefault();
   if (!validarFormulario(CAMPOS_ATENCION, evento.target)) return;
 
-  // crearAtencion (data.js) también marca la cita como "atendida".
-  crearAtencion({
-    citaId: citaAtendiendo.id,
-    mascotaId: mascota.id,
-    fecha: citaAtendiendo.fecha,
-    diagnostico: campos.diagnostico.value.trim(),
-    tratamiento: campos.tratamiento.value.trim(),
-    medicamentos: campos.medicamentos.value.trim(),
-  });
+  try {
+    const atencion = await api("POST", "/atenciones", {
+      citaId: citaAtendiendo.id,
+      diagnostico: campos.diagnostico.value.trim(),
+      tratamiento: campos.tratamiento.value.trim(),
+      medicamentos: campos.medicamentos.value.trim(),
+    });
+    atenciones.push(atencion);
+    // El servidor también marca la cita como "atendida".
+    citaAtendiendo.estado = "atendida";
 
-  cerrarAtencion();
-  mostrarHistorial();
-  mostrarCitas();
-  mostrarMensaje("Atención registrada. La cita quedó como atendida.", "exito");
+    cerrarAtencion();
+    mostrarHistorial();
+    mostrarCitas();
+    mostrarMensaje("Atención registrada. La cita quedó como atendida.", "exito");
+  } catch (error) {
+    mostrarErroresServidor(error, { diagnostico: campos.diagnostico, tratamiento: campos.tratamiento });
+  }
 }
 
 /* ---------- Editar y eliminar ---------- */
@@ -258,20 +274,29 @@ function cerrarEdicion() {
   formulario.classList.add("d-none");
 }
 
-function guardarEdicion(evento) {
+async function guardarEdicion(evento) {
   evento.preventDefault();
   if (!validarFormulario(CAMPOS_EDICION, evento.target)) return;
 
-  mascota = actualizarMascota(mascota.id, {
-    nombre: capitalizar(campos.nombre.value),
-    especie: campos.especie.value,
-    raza: capitalizar(campos.raza.value),
-    edad: Number(campos.edad.value),
-  });
+  try {
+    mascota = await api("PUT", `/mascotas/${mascota.id}`, {
+      nombre: capitalizar(campos.nombre.value),
+      especie: campos.especie.value,
+      raza: capitalizar(campos.raza.value),
+      edad: Number(campos.edad.value),
+    });
 
-  cerrarEdicion();
-  mostrarDatos();
-  mostrarMensaje("Los datos de la mascota se actualizaron.", "exito");
+    cerrarEdicion();
+    mostrarDatos();
+    mostrarMensaje("Los datos de la mascota se actualizaron.", "exito");
+  } catch (error) {
+    mostrarErroresServidor(error, {
+      nombre: campos.nombre,
+      especie: campos.especie,
+      raza: campos.raza,
+      edad: campos.edad,
+    });
+  }
 }
 
 async function confirmarEliminacion() {
@@ -281,7 +306,12 @@ async function confirmarEliminacion() {
   );
   if (!confirmado) return;
 
-  eliminarMascota(mascota.id);
+  try {
+    await api("DELETE", `/mascotas/${mascota.id}`);
+  } catch (error) {
+    mostrarErroresServidor(error);
+    return;
+  }
   mensajeParaSiguientePagina(`Se eliminó a ${mascota.nombre} del sistema.`);
   window.location.href = "mascotas.html";
 }
@@ -318,10 +348,12 @@ function mostrarAviso() {
   document.getElementById("seccion-aviso").classList.remove("d-none");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  mascota = obtenerMascotaPorId(obtenerParametroURL("id"));
-  if (!mascota) {
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await cargarDatos(obtenerParametroURL("id"));
+  } catch (error) {
     mostrarAviso();
+    if (error.estado !== 404) mostrarErroresServidor(error);
     return;
   }
 

@@ -13,6 +13,10 @@ const campos = {
   edad: document.getElementById("edad"),
 };
 
+// Datos traídos del servidor al cargar la página.
+let duenos = [];
+let mascotas = [];
+
 /* ---------- Utilidades ---------- */
 
 // Deja el RUT sin puntos ni guion, para comparar RUT escritos con distinto formato.
@@ -34,7 +38,7 @@ function formatearTelefono(telefono) {
 }
 
 function rutRepetido(rut) {
-  return obtenerDuenos().some((d) => limpiarRut(d.rut) === limpiarRut(rut));
+  return duenos.some((d) => limpiarRut(d.rut) === limpiarRut(rut));
 }
 
 function esDuenoNuevo() {
@@ -43,10 +47,15 @@ function esDuenoNuevo() {
 
 /* ---------- Listado ---------- */
 
+async function cargarDatos() {
+  duenos = await api("GET", "/duenos");
+  mascotas = await api("GET", "/mascotas");
+}
+
 // Une cada mascota con su dueño para no buscarlo varias veces.
 function obtenerMascotasConDueno() {
-  return obtenerMascotas().map((mascota) => {
-    const dueno = obtenerDuenoPorId(mascota.duenoId);
+  return mascotas.map((mascota) => {
+    const dueno = duenos.find((d) => d.id === mascota.duenoId);
     return { ...mascota, dueno };
   });
 }
@@ -116,8 +125,8 @@ function mostrarMascotas() {
 function llenarDuenos() {
   campos.dueno.innerHTML = "";
   campos.dueno.appendChild(crearOpcion("", "Selecciona un dueño"));
-  const duenos = obtenerDuenos().sort((a, b) => a.nombre.localeCompare(b.nombre));
-  duenos.forEach((d) => campos.dueno.appendChild(crearOpcion(d.id, `${d.nombre} (${d.rut})`)));
+  const ordenados = [...duenos].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  ordenados.forEach((d) => campos.dueno.appendChild(crearOpcion(d.id, `${d.nombre} (${d.rut})`)));
 }
 
 // Muestra los campos del dueño registrado o los del dueño nuevo.
@@ -169,7 +178,7 @@ function validarCampo(nombre) {
       if (!esRequerido(valor)) return "Escribe el nombre de la mascota.";
       if (!esTextoValido(valor)) return "El nombre solo puede tener letras y espacios.";
       if (!esDuenoNuevo() && campos.dueno.value) {
-        const repetida = obtenerMascotasPorDueno(campos.dueno.value).some(
+        const repetida = mascotas.filter((m) => m.duenoId === Number(campos.dueno.value)).some(
           (m) => normalizar(m.nombre) === normalizar(valor)
         );
         if (repetida) return "Este dueño ya tiene una mascota con ese nombre.";
@@ -238,7 +247,7 @@ function iniciarEventos() {
 
 /* ---------- Guardar ---------- */
 
-function guardarMascota(evento) {
+async function guardarMascota(evento) {
   evento.preventDefault();
 
   // Se validan todos los campos (map, no some, para marcar todos los errores a la vez).
@@ -252,31 +261,58 @@ function guardarMascota(evento) {
 
   let duenoId = Number(campos.dueno.value);
   if (esDuenoNuevo()) {
-    const dueno = crearDueno({
-      nombre: capitalizar(campos.duenoNombre.value),
-      rut: formatearRut(campos.duenoRut.value),
-      telefono: formatearTelefono(campos.duenoTelefono.value),
-      email: campos.duenoEmail.value.trim().toLowerCase(),
-    });
-    duenoId = dueno.id;
-    llenarDuenos();
+    try {
+      const dueno = await api("POST", "/duenos", {
+        nombre: capitalizar(campos.duenoNombre.value),
+        rut: formatearRut(campos.duenoRut.value),
+        telefono: formatearTelefono(campos.duenoTelefono.value),
+        email: campos.duenoEmail.value.trim().toLowerCase(),
+      });
+      duenos.push(dueno);
+      duenoId = dueno.id;
+      llenarDuenos();
+    } catch (error) {
+      mostrarErroresServidor(error, {
+        nombre: campos.duenoNombre,
+        rut: campos.duenoRut,
+        telefono: campos.duenoTelefono,
+        email: campos.duenoEmail,
+      });
+      return;
+    }
   }
 
-  const mascota = crearMascota({
-    nombre: capitalizar(campos.nombre.value),
-    especie: campos.especie.value,
-    raza: capitalizar(campos.raza.value),
-    edad: Number(campos.edad.value),
-    duenoId: duenoId,
-  });
+  try {
+    const mascota = await api("POST", "/mascotas", {
+      nombre: capitalizar(campos.nombre.value),
+      especie: campos.especie.value,
+      raza: capitalizar(campos.raza.value),
+      edad: Number(campos.edad.value),
+      duenoId: duenoId,
+    });
+    mascotas.push(mascota);
 
-  document.getElementById("form-mascota").reset();
-  mostrarMascotas();
-  mostrarMensaje(`Se registró a ${mascota.nombre} correctamente.`, "exito");
+    document.getElementById("form-mascota").reset();
+    mostrarMascotas();
+    mostrarMensaje(`Se registró a ${mascota.nombre} correctamente.`, "exito");
+  } catch (error) {
+    mostrarErroresServidor(error, {
+      nombre: campos.nombre,
+      especie: campos.especie,
+      raza: campos.raza,
+      edad: campos.edad,
+      duenoId: campos.dueno,
+    });
+  }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  llenarDuenos();
+document.addEventListener("DOMContentLoaded", async () => {
   iniciarEventos();
+  try {
+    await cargarDatos();
+  } catch (error) {
+    mostrarErroresServidor(error);
+  }
+  llenarDuenos();
   mostrarMascotas();
 });
