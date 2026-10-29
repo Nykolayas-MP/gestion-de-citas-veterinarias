@@ -10,12 +10,11 @@ function esEmailValido(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }
 
-// Celular chileno: +56 9 1234 5678 (espacios opcionales).
+// +56 9 1234 5678, con o sin espacios
 function esTelefonoValido(telefono) {
   return /^\+?56\s?9\s?\d{4}\s?\d{4}$/.test(telefono.trim());
 }
 
-// Solo letras (incluye tildes y ñ), espacios y guiones. Mínimo 2 caracteres.
 function esTextoValido(texto) {
   return /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s-]{2,}$/.test(texto.trim());
 }
@@ -25,7 +24,7 @@ function esNumeroEnRango(valor, min, max) {
   return valor !== "" && Number.isInteger(numero) && numero >= min && numero <= max;
 }
 
-// RUT chileno con dígito verificador (módulo 11). Acepta "12.345.678-5" o "12345678-5".
+// RUT con dígito verificador (módulo 11)
 function esRutValido(rut) {
   const limpio = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
   if (!/^\d{7,8}[0-9K]$/.test(limpio)) return false;
@@ -45,17 +44,15 @@ function esRutValido(rut) {
   return dvIngresado === dvCalculado;
 }
 
-// La fecha ("YYYY-MM-DD") es hoy o posterior.
 function esFechaNoPasada(fecha) {
   return fecha >= fechaLocalISO();
 }
 
-// La clínica atiende de lunes a sábado. getDay() devuelve 0 para domingo.
+// getDay() da 0 para el domingo
 function esDiaHabil(fecha) {
   return new Date(`${fecha}T00:00:00`).getDay() !== 0;
 }
 
-// La hora ("HH:MM") está dentro del horario de atención de la clínica.
 function esHoraEnHorario(hora) {
   return hora >= HORARIO_APERTURA && hora < HORARIO_CIERRE;
 }

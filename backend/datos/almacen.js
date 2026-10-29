@@ -1,12 +1,10 @@
 const { crearDatosIniciales } = require("./datos-iniciales");
 
-// Los datos viven en memoria mientras el servidor está encendido.
-// Al apagarlo se pierden y al encenderlo se vuelve a los datos de ejemplo.
-// En el Taller 3 estas funciones se cambian por consultas a la base de datos.
+// Todo vive en memoria: al reiniciar el servidor vuelven los datos de ejemplo.
+// En el Taller 3 esto se cambia por la base de datos.
 let datos = crearDatosIniciales();
 
-// Las funciones devuelven COPIAS de los datos. Así una ruta no puede
-// modificar la lista por accidente (por ejemplo, al ordenarla con sort).
+// Siempre devolvemos copias, así un sort() en una ruta no desordena la lista real
 function copiar(item) {
   return item ? { ...item } : null;
 }
@@ -16,7 +14,7 @@ function coleccion(nombre) {
   return datos[nombre];
 }
 
-// Todos los elementos. Opcionalmente filtrados: listar("citas", (c) => c.estado === "pendiente")
+// ej: listar("citas", (c) => c.estado === "pendiente")
 function listar(nombre, condicion = () => true) {
   return coleccion(nombre).filter(condicion).map(copiar);
 }
@@ -25,7 +23,6 @@ function buscarPorId(nombre, id) {
   return copiar(coleccion(nombre).find((item) => item.id === Number(id)));
 }
 
-// Agrega un elemento con el siguiente id disponible y lo devuelve.
 function insertar(nombre, item) {
   const lista = coleccion(nombre);
   const id = lista.reduce((max, actual) => Math.max(max, actual.id), 0) + 1;
@@ -34,7 +31,7 @@ function insertar(nombre, item) {
   return copiar(nuevo);
 }
 
-// Cambia solo los campos indicados. Devuelve el elemento actualizado o null si no existe.
+// cambia solo los campos que vienen
 function actualizar(nombre, id, cambios) {
   const lista = coleccion(nombre);
   const indice = lista.findIndex((item) => item.id === Number(id));
@@ -43,7 +40,6 @@ function actualizar(nombre, id, cambios) {
   return copiar(lista[indice]);
 }
 
-// Devuelve true si eliminó el elemento.
 function eliminar(nombre, id) {
   const lista = coleccion(nombre);
   const indice = lista.findIndex((item) => item.id === Number(id));
@@ -52,15 +48,13 @@ function eliminar(nombre, id) {
   return true;
 }
 
-// Elimina todos los elementos que cumplen la condición. Devuelve cuántos eliminó.
-// Ej: eliminarDonde("citas", (c) => c.mascotaId === 3)
+// ej: eliminarDonde("citas", (c) => c.mascotaId === 3)
 function eliminarDonde(nombre, condicion) {
   const antes = coleccion(nombre).length;
   datos[nombre] = coleccion(nombre).filter((item) => !condicion(item));
   return antes - datos[nombre].length;
 }
 
-// Vuelve a los datos de ejemplo.
 function reiniciar() {
   datos = crearDatosIniciales();
 }

@@ -1,11 +1,7 @@
 const { fechaLocalISO, fechaRelativa } = require("./utilidades/fechas");
 
-// Mismas reglas que frontend/js/validaciones.js. Se repiten en el servidor
-// porque un backend nunca debe confiar en lo que le envían: cualquiera
-// puede saltarse el formulario y llamar a la API directamente.
-//
-// Diferencia con el frontend: aquí los valores pueden llegar con cualquier
-// tipo (número, null, objeto...), así que primero se convierten a texto.
+// Las mismas reglas del frontend. Se repiten porque cualquiera puede
+// saltarse el formulario y llamar a la API directo.
 
 const HORARIO_APERTURA = "09:00";
 const HORARIO_CIERRE = "19:00";
@@ -25,12 +21,11 @@ function esEmailValido(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(texto(email));
 }
 
-// Celular chileno: +56 9 1234 5678 (espacios opcionales).
+// +56 9 1234 5678, con o sin espacios
 function esTelefonoValido(telefono) {
   return /^\+?56\s?9\s?\d{4}\s?\d{4}$/.test(texto(telefono));
 }
 
-// Solo letras (incluye tildes y ñ), espacios y guiones. Mínimo 2 caracteres.
 function esTextoValido(valor) {
   return /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s-]{2,}$/.test(texto(valor));
 }
@@ -41,7 +36,7 @@ function esNumeroEnRango(valor, min, max) {
   return Number.isInteger(numero) && numero >= min && numero <= max;
 }
 
-// RUT chileno con dígito verificador (módulo 11). Acepta "12.345.678-5" o "12345678-5".
+// RUT con dígito verificador (módulo 11)
 function esRutValido(rut) {
   const limpio = texto(rut).replace(/\./g, "").replace(/-/g, "").toUpperCase();
   if (!/^\d{7,8}[0-9K]$/.test(limpio)) return false;
@@ -61,7 +56,7 @@ function esRutValido(rut) {
   return dvIngresado === dvCalculado;
 }
 
-// Formato "YYYY-MM-DD" y que la fecha exista (rechaza "2026-02-30").
+// también revisa que la fecha exista: 2026-02-30 no pasa
 function esFechaValida(fecha) {
   const valor = texto(fecha);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
@@ -69,27 +64,23 @@ function esFechaValida(fecha) {
   return !Number.isNaN(fechaReal.getTime()) && fechaLocalISO(fechaReal) === valor;
 }
 
-// Formato "HH:MM" en 24 horas.
 function esHoraValida(hora) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(texto(hora));
 }
 
-// La fecha ("YYYY-MM-DD") es hoy o posterior.
 function esFechaNoPasada(fecha) {
   return texto(fecha) >= fechaLocalISO();
 }
 
-// No más allá de los días de anticipación permitidos.
 function esFechaDentroDelLimite(fecha) {
   return texto(fecha) <= fechaRelativa(MAX_DIAS_ANTICIPACION);
 }
 
-// La clínica atiende de lunes a sábado. getDay() devuelve 0 para domingo.
+// getDay() da 0 para el domingo
 function esDiaHabil(fecha) {
   return new Date(`${texto(fecha)}T00:00:00`).getDay() !== 0;
 }
 
-// La hora ("HH:MM") está dentro del horario de atención de la clínica.
 function esHoraEnHorario(hora) {
   const valor = texto(hora);
   return valor >= HORARIO_APERTURA && valor < HORARIO_CIERRE;

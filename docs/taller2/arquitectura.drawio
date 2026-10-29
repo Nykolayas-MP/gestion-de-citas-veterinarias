@@ -1,0 +1,149 @@
+<mxfile host="Electron">
+  <diagram id="arquitectura" name="Arquitectura">
+    <mxGraphModel dx="1414" dy="841" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1360" pageHeight="830" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="navegador" parent="1" style="rounded=1;arcSize=6;container=1;collapsible=0;align=left;verticalAlign=top;spacingLeft=20;spacingTop=14;fillColor=#ffffff;strokeColor=#e4ecee;strokeWidth=1.5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span&gt;&lt;span style=&quot;font-size: 11px; font-weight: bold; color: light-dark(transparent, rgb(0, 0, 255));&quot;&gt;&amp;nbsp;NAVEGADOR&lt;/span&gt;&lt;span style=&quot;font-size: 11px; font-weight: bold; color: rgb(21, 128, 61);&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 17px; color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;Frontend&lt;/b&gt;" vertex="1">
+          <mxGeometry height="390" width="300" x="30" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="navegador" style="rounded=1;arcSize=12;align=left;spacingLeft=14;verticalAlign=middle;fillColor=default;strokeColor=light-dark(#65E4A3,#FFFFFF);strokeWidth=1.5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;&lt;b style=&quot;font-size: 15px;&quot;&gt;data.js → api()&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;envía la petición con fetch() y&lt;br&gt;devuelve los datos o un error&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="260" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="paginas-js" parent="navegador" style="rounded=1;arcSize=12;align=left;spacingLeft=14;verticalAlign=middle;fillColor=default;strokeColor=light-dark(#E4ECEE,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;&lt;b style=&quot;font-size: 15px;&quot;&gt;Un archivo JS por página&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;citas.js, nueva-cita.js,&lt;br&gt;mascotas.js, mascota.js&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="260" x="20" y="142" as="geometry" />
+        </mxCell>
+        <mxCell id="ui" parent="navegador" style="rounded=1;arcSize=12;align=left;spacingLeft=14;verticalAlign=middle;fillColor=none;strokeColor=light-dark(#E4ECEE,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;&lt;b style=&quot;font-size: 15px;&quot;&gt;ui.js y validaciones.js&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;mensajes, errores bajo cada campo&lt;br&gt;y reglas de los formularios&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="260" x="20" y="224" as="geometry" />
+        </mxCell>
+        <mxCell id="html" parent="navegador" style="rounded=1;arcSize=12;align=left;spacingLeft=14;verticalAlign=middle;fillColor=none;strokeColor=light-dark(#E4ECEE,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;&lt;b style=&quot;font-size: 15px;&quot;&gt;Páginas HTML + CSS&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;inicio, citas, agendar cita,&lt;br&gt;mascotas y ficha de mascota&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="260" x="20" y="306" as="geometry" />
+        </mxCell>
+        <mxCell id="app" parent="1" style="rounded=1;arcSize=14;align=left;spacingLeft=14;verticalAlign=middle;fillColor=none;strokeColor=#8a9ba0;strokeWidth=1.5;dashed=1;dashPattern=6 5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;b style=&quot;font-size:15px;color:#5b7075&quot;&gt;App móvil (Taller 4)&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:12.5px;color:#8a9ba0&quot;&gt;usará la misma API que la página web&lt;/span&gt;" vertex="1">
+          <mxGeometry height="60" width="300" x="30" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="servidor" parent="1" style="rounded=1;arcSize=6;container=1;collapsible=0;align=left;verticalAlign=top;spacingLeft=20;spacingTop=14;fillColor=default;strokeColor=default;fontFamily=Segoe UI;html=1;whiteSpace=wrap;fontColor=light-dark(#000000,#FFFFFF);" value="&lt;span style=&quot;font-size: 11px; font-weight: bold; color: light-dark(rgb(0, 0, 0), rgb(255, 51, 153));&quot;&gt;&amp;nbsp;SERVIDOR&amp;nbsp;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 17px;&quot;&gt;Backend · Node.js sin librerías&lt;/b&gt;" vertex="1">
+          <mxGeometry height="470" width="560" x="450" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="server" parent="servidor" style="rounded=1;arcSize=14;align=left;spacingLeft=14;verticalAlign=middle;fillColor=default;strokeColor=default;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;b style=&quot;font-size: 15px;&quot;&gt;server.js&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: light-dark(rgb(184, 199, 211), rgb(130, 148, 152));&quot;&gt;recibe cada petición y anota&lt;br&gt;el resultado en la consola&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="270" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="enrutador" parent="servidor" style="rounded=1;arcSize=14;align=left;spacingLeft=14;verticalAlign=middle;fillColor=default;strokeColor=default;fontFamily=Segoe UI;html=1;whiteSpace=wrap;fontColor=default;textShadow=0;" value="&lt;b style=&quot;font-size: 15px;&quot;&gt;utilidades/enrutador.js&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: light-dark(rgb(184, 199, 211), rgb(130, 148, 152));&quot;&gt;método + URL → la función que responde&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="270" x="20" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="http" parent="servidor" style="rounded=1;arcSize=14;align=left;spacingLeft=12;verticalAlign=middle;fillColor=none;strokeColor=light-dark(#3A5A78,#FFFFFF);strokeWidth=1.5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;b style=&quot;font-size: 13.5px;&quot;&gt;utilidades/http.js&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: light-dark(rgb(184, 199, 211), rgb(130, 148, 152));&quot;&gt;lee el JSON que llega&lt;br&gt;y envía la respuesta&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="170" x="370" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="archivos" parent="servidor" style="rounded=1;arcSize=14;align=left;spacingLeft=12;verticalAlign=middle;fillColor=none;strokeColor=light-dark(#3A5A78,#FFFFFF);strokeWidth=1.5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;b style=&quot;font-size: 13.5px;&quot;&gt;utilidades/archivos.js&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: light-dark(rgb(184, 199, 211), rgb(130, 148, 152));&quot;&gt;entrega la página pedida&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="170" x="370" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="validaciones" parent="servidor" style="rounded=1;arcSize=14;align=left;spacingLeft=12;verticalAlign=middle;fillColor=none;strokeColor=light-dark(#3A5A78,#FFFFFF);strokeWidth=1.5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&lt;b style=&quot;font-size: 13.5px;&quot;&gt;validaciones.js&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 12.5px; color: light-dark(rgb(184, 199, 211), rgb(130, 148, 152));&quot;&gt;responde sí o no:&lt;br&gt;¿es domingo? ¿RUT válido?&lt;/span&gt;" vertex="1">
+          <mxGeometry height="74" width="170" x="370" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="server-http" edge="1" parent="servidor" style="strokeColor=light-dark(#8FB3CF,#FFFFFF);strokeWidth=1.5;fontSize=11;fontColor=#000000;labelBackgroundColor=#FFFFFF;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" value="lee y&lt;br&gt;responde">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="290" y="88.5" as="sourcePoint" />
+            <mxPoint x="370" y="88.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="iAEpj4VD29087ly4ZHyp-4" parent="servidor" style="rounded=1;arcSize=14;align=left;spacingLeft=14;verticalAlign=middle;fillColor=default;strokeColor=default;fontFamily=Segoe UI;html=1;whiteSpace=wrap;fontColor=default;textShadow=0;" value="&lt;b style=&quot;color: light-dark(rgb(255, 255, 255), rgb(255, 255, 255)); font-size: 15px;&quot;&gt;rutas/&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: light-dark(rgb(184, 199, 211), rgb(130, 148, 152));&quot;&gt;citas · duenos · mascotas · atenciones&lt;/span&gt;" vertex="1">
+          <mxGeometry height="58" width="270" x="20" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="datos" parent="1" style="rounded=1;arcSize=6;container=1;collapsible=0;align=left;verticalAlign=top;spacingLeft=20;spacingTop=14;fillColor=#ffffff;strokeColor=#e4ecee;strokeWidth=1.5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;font-size: 11px; font-weight: bold; color: light-dark(rgb(0, 0, 0), rgb(51, 255, 255));&quot;&gt;&amp;nbsp;DATOS&amp;nbsp;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 17px; color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;En memoria&lt;/b&gt;" vertex="1">
+          <mxGeometry height="470" width="230" x="1100" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="iniciales" parent="datos" style="rounded=1;arcSize=12;align=left;spacingLeft=14;verticalAlign=middle;fillColor=#f7f9fa;strokeColor=default;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;b style=&quot;font-size: 14px; color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;datos-iniciales.js&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;dueños, mascotas y citas&lt;br&gt;de ejemplo al encender&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="190" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="almacen" parent="datos" style="rounded=1;arcSize=12;align=left;spacingLeft=14;verticalAlign=middle;fillColor=none;strokeColor=default;strokeWidth=1.5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;b style=&quot;font-size: 15px; color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;almacen.js&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;listar · buscarPorId&lt;br&gt;insertar · actualizar&lt;br&gt;eliminar · eliminarDonde&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 11.5px; color: rgb(0, 0, 0);&quot;&gt;se pierde al apagar&lt;/span&gt;" vertex="1">
+          <mxGeometry height="110" width="190" x="20" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="bd" parent="datos" style="rounded=1;arcSize=14;align=left;spacingLeft=14;verticalAlign=middle;fillColor=none;strokeColor=#8a9ba0;strokeWidth=1.5;dashed=1;dashPattern=6 5;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;b style=&quot;font-size:14px;color:#5b7075&quot;&gt;Base de datos&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:12.5px;color:#8a9ba0&quot;&gt;(Taller 3)&lt;br&gt;reemplaza solo a&lt;br&gt;almacen.js&lt;/span&gt;" vertex="1">
+          <mxGeometry height="90" width="190" x="20" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="peticion" edge="1" parent="1" style="strokeColor=light-dark(#0A2640,#FFFFFF);strokeWidth=2;fontSize=12;fontColor=light-dark(transparent,#FFFFFF);labelBackgroundColor=#f7f9fa;verticalAlign=bottom;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" value="&lt;b&gt;Petición HTTP&lt;/b&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="332" y="206" as="sourcePoint" />
+            <mxPoint x="448" y="206" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="respuesta" edge="1" parent="1" style="strokeColor=light-dark(#65E4A3,#FFFFFF);strokeWidth=2.5;fontSize=12;fontColor=light-dark(transparent,#FFFFFF);labelBackgroundColor=#f7f9fa;verticalAlign=top;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" value="&lt;b&gt;Respuesta JSON&lt;/b&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="448" y="238" as="sourcePoint" />
+            <mxPoint x="332" y="238" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rotulo-peticion" parent="1" style="text;align=left;verticalAlign=middle;align=center;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;font-size:11.5px;color:#5b7075&quot;&gt;POST /api/citas&lt;/span&gt;" vertex="1">
+          <mxGeometry height="18" width="110" x="335" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="rotulo-codigos" parent="1" style="text;align=left;verticalAlign=middle;align=center;fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;font-size:11.5px;color:#5b7075&quot;&gt;201 · 400 · 404 · 409&lt;/span&gt;" vertex="1">
+          <mxGeometry height="18" width="110" x="335" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="misma-api" edge="1" parent="1" style="strokeColor=#8a9ba0;strokeWidth=1.5;dashed=1;dashPattern=6 5;fontSize=11.5;fontColor=#8a9ba0;labelBackgroundColor=#f7f9fa;verticalAlign=bottom;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" value="misma API">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="332" y="560" as="sourcePoint" />
+            <mxPoint x="448" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="server-enrutador" edge="1" parent="1" source="server" style="strokeColor=light-dark(#65e4a3, #ffffff);strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" target="enrutador" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="enrutador-rutas" edge="1" parent="1" source="enrutador" style="strokeColor=light-dark(#65E4A3,#FFFFFF);strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="605" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="server-archivos" edge="1" parent="1" source="server" style="strokeColor=light-dark(#8FB3CF,#FFFFFF);strokeWidth=1.5;fontSize=11;fontColor=light-dark(#FFFFFF,#FFFFFF);labelBackgroundColor=light-dark(#000000,#000000);edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.8;entryX=0;entryY=0.5;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" target="archivos" value="si no&lt;br&gt;es /api">
+          <mxGeometry relative="1" x="0.0323" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rutas-validaciones" edge="1" parent="1" style="strokeColor=light-dark(#8FB3CF,#FFFFFF);strokeWidth=1.5;fontSize=11;fontColor=light-dark(#B8C7D3,#FFFFFF);labelBackgroundColor=light-dark(#0A2640,#000000);edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0;entryY=0.5;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" target="validaciones" value="¿cumple las reglas?">
+          <mxGeometry relative="1" x="-0.0219" y="-3" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="605" y="457" />
+            </Array>
+            <mxPoint x="605" y="398" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="guarda" edge="1" parent="1" style="strokeWidth=2;fontSize=12;fontColor=#0a2640;labelBackgroundColor=#f7f9fa;verticalAlign=bottom;fontSize=11.5;fontColor=#5b7075;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;strokeColor=#000000;" value="guarda, busca">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="742" y="362" as="sourcePoint" />
+            <mxPoint x="1098" y="362" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="copia" edge="1" parent="1" style="strokeColor=light-dark(#65E4A3,#FFFFFF);strokeWidth=2.5;fontSize=12;fontColor=#0a2640;labelBackgroundColor=#f7f9fa;verticalAlign=top;fontSize=11.5;fontColor=#5b7075;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" value="copia del dato">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1098" y="388" as="sourcePoint" />
+            <mxPoint x="742" y="388" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="carga" edge="1" parent="1" source="iniciales" style="strokeColor=#8a9ba0;strokeWidth=1.5;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" target="almacen" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="reemplaza" edge="1" parent="1" source="bd" style="strokeColor=#8a9ba0;strokeWidth=1.5;dashed=1;dashPattern=6 5;fontSize=11.5;fontColor=#8a9ba0;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontFamily=Segoe UI;html=1;endArrow=block;endFill=1;rounded=0;" target="almacen" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="titulo-ejemplo" parent="1" style="text;align=left;verticalAlign=middle;fontFamily=Segoe UI;html=1;whiteSpace=wrap;fontColor=light-dark(#FFFFFF,#FFFFFF);" value="&lt;b style=&quot;font-size: 18px;&quot;&gt;Ejemplo: agendar una cita&lt;/b&gt;" vertex="1">
+          <mxGeometry height="26" width="400" x="30" y="622" as="geometry" />
+        </mxCell>
+        <mxCell id="paso-1" parent="1" style="rounded=1;arcSize=10;align=left;verticalAlign=top;spacingLeft=16;spacingTop=14;spacingRight=10;fillColor=#ffffff;strokeColor=light-dark(#E4ECEE,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(255, 255, 255), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;background-color: light-dark(rgb(10, 38, 64), rgb(0, 0, 0));&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: bold;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;font-size: 14px; font-weight: bold;&quot;&gt;1&lt;/span&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 14px; font-weight: bold; background-color: light-dark(rgb(10, 38, 64), rgb(0, 0, 0));&quot;&gt;&amp;nbsp;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 14px;&quot;&gt;La página&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;nueva-cita.js junta el formulario y llama a api(&quot;POST&quot;, &quot;/citas&quot;, datos).&lt;/span&gt;" vertex="1">
+          <mxGeometry height="140" width="248" x="30" y="658" as="geometry" />
+        </mxCell>
+        <mxCell id="paso-2" parent="1" style="rounded=1;arcSize=10;align=left;verticalAlign=top;spacingLeft=16;spacingTop=14;spacingRight=10;fillColor=#ffffff;strokeColor=light-dark(#E4ECEE,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(10, 38, 64), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: bold; background-color: light-dark(rgb(10, 38, 64), rgb(0, 0, 0));&quot;&gt;&amp;nbsp;2&amp;nbsp;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 14px;&quot;&gt;El servidor&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;server.js recibe la petición y el enrutador se la pasa a rutas/citas.js.&lt;/span&gt;" vertex="1">
+          <mxGeometry height="140" width="248" x="292" y="658" as="geometry" />
+        </mxCell>
+        <mxCell id="paso-3" parent="1" style="rounded=1;arcSize=10;align=left;verticalAlign=top;spacingLeft=16;spacingTop=14;spacingRight=10;fillColor=#ffffff;strokeColor=light-dark(#E4ECEE,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(255, 255, 255), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: bold; background-color: light-dark(rgb(10, 38, 64), rgb(0, 0, 0));&quot;&gt;&amp;nbsp;3&amp;nbsp;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 14px;&quot;&gt;Las reglas&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;rutas/citas.js pregunta a validaciones.js (¿es domingo?) y busca en el almacén (¿la hora está libre?). Si algo falla, responde 400 o 409 y no guarda.&lt;/span&gt;" vertex="1">
+          <mxGeometry height="140" width="248" x="554" y="658" as="geometry" />
+        </mxCell>
+        <mxCell id="paso-4" parent="1" style="rounded=1;arcSize=10;align=left;verticalAlign=top;spacingLeft=16;spacingTop=14;spacingRight=10;fillColor=#ffffff;strokeColor=light-dark(#E4ECEE,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(255, 255, 255), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: bold; background-color: light-dark(rgb(10, 38, 64), rgb(0, 0, 0));&quot;&gt;&amp;nbsp;4&amp;nbsp;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 14px;&quot;&gt;Se guarda&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;almacen.js agrega la cita con un id nuevo y estado &quot;pendiente&quot;.&lt;/span&gt;" vertex="1">
+          <mxGeometry height="140" width="248" x="816" y="658" as="geometry" />
+        </mxCell>
+        <mxCell id="paso-5" parent="1" style="rounded=1;arcSize=10;align=left;verticalAlign=top;spacingLeft=16;spacingTop=14;spacingRight=10;fillColor=default;strokeColor=light-dark(#65E4A3,#FFFFFF);fontFamily=Segoe UI;html=1;whiteSpace=wrap;" value="&lt;span style=&quot;color: light-dark(rgb(255, 255, 255), rgb(255, 255, 255));&quot;&gt;&lt;span style=&quot;font-size: 14px; font-weight: bold; background-color: light-dark(rgb(10, 38, 64), rgb(0, 0, 0));&quot;&gt;&amp;nbsp;5&amp;nbsp;&lt;/span&gt;&amp;nbsp; &lt;b style=&quot;font-size: 14px;&quot;&gt;La respuesta&lt;/b&gt;&lt;br&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 12.5px; color: rgb(91, 112, 117);&quot;&gt;El servidor responde 201 con la cita en JSON y la página muestra &quot;¡Cita agendada!&quot;.&lt;/span&gt;" vertex="1">
+          <mxGeometry height="140" width="252" x="1078" y="658" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

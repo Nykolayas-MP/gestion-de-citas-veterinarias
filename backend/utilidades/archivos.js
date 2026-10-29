@@ -3,7 +3,6 @@ const path = require("path");
 
 const CARPETA_FRONTEND = path.join(__dirname, "..", "..", "frontend");
 
-// Tipo de contenido según la extensión, para que el navegador sepa qué recibe.
 const TIPOS = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -22,7 +21,7 @@ function responderTexto(res, estado, texto) {
   res.end(texto);
 }
 
-// Envía un archivo de la carpeta frontend. "/" entrega index.html.
+// "/" entrega index.html
 async function servirArchivo(res, rutaUrl) {
   let relativa;
   try {
@@ -32,8 +31,7 @@ async function servirArchivo(res, rutaUrl) {
   }
   if (relativa.endsWith("/")) relativa += "index.html";
 
-  // path.join resuelve los ".." y aquí se comprueba que el resultado
-  // siga dentro de frontend/. Así nadie puede leer otros archivos del equipo.
+  // que nadie pida /../backend/... y lea archivos fuera de frontend/
   const rutaCompleta = path.join(CARPETA_FRONTEND, relativa);
   if (!rutaCompleta.startsWith(CARPETA_FRONTEND + path.sep)) {
     return responderTexto(res, 403, "Acceso no permitido.");

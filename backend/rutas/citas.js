@@ -21,8 +21,6 @@ const MIN_CARACTERES_MOTIVO = 3;
 const MAX_CARACTERES_MOTIVO = 60;
 const MAX_OBSERVACIONES = 200;
 
-/* ---------- Horarios ---------- */
-
 function aMinutos(hora) {
   const [h, m] = hora.split(":").map(Number);
   return h * 60 + m;
@@ -34,7 +32,7 @@ function aHora(minutos) {
   return `${h}:${m}`;
 }
 
-// Todos los bloques de la jornada: 09:00, 09:30, ..., 18:30
+// 09:00, 09:30, ..., 18:30
 function generarHorarios() {
   const horarios = [];
   for (let minutos = aMinutos(HORARIO_APERTURA); minutos < aMinutos(HORARIO_CIERRE); minutos += DURACION_CITA_MINUTOS) {
@@ -43,8 +41,7 @@ function generarHorarios() {
   return horarios;
 }
 
-// Citas que bloquean un horario ese día: todas menos las canceladas.
-// "excluirId" deja fuera la cita que se está modificando, para que no choque consigo misma.
+// las canceladas no ocupan horario. excluirId es la cita que se está editando
 function citasActivasDelDia(fecha, excluirId = null) {
   return almacen.listar(
     "citas",
@@ -56,9 +53,6 @@ function esHoraPasada(fecha, hora) {
   return fecha === fechaLocalISO() && hora <= horaActual();
 }
 
-/* ---------- Validaciones ---------- */
-
-// Devuelve el mensaje de error de la fecha, o "" si es válida.
 function errorFecha(fecha) {
   if (!esRequerido(fecha)) return "Elige una fecha.";
   if (!esFechaValida(fecha)) return "La fecha debe tener el formato AAAA-MM-DD.";
@@ -68,8 +62,7 @@ function errorFecha(fecha) {
   return "";
 }
 
-// Revisa los datos de una cita. "citaId" se usa al modificar una cita existente.
-// Devuelve { errores, conflicto }: los errores son 400 y el conflicto es 409.
+// errores → 400, conflicto → 409
 function validarCita(datos, citaId = null) {
   const errores = {};
 
@@ -98,7 +91,7 @@ function validarCita(datos, citaId = null) {
 
   if (Object.keys(errores).length > 0) return { errores, conflicto: null };
 
-  // Con los datos correctos, se revisa que no choquen con otras citas.
+  // si los datos están bien, revisamos choques con otras citas
   const delDia = citasActivasDelDia(texto(datos.fecha), citaId);
   if (delDia.some((c) => c.hora === hora)) {
     return { errores, conflicto: { hora: "Ese horario ya fue tomado. Elige otro." } };
@@ -111,7 +104,6 @@ function validarCita(datos, citaId = null) {
   return { errores, conflicto: null };
 }
 
-// Lanza el error que corresponda si los datos de la cita no sirven.
 function comprobarCita(datos, citaId = null) {
   const { errores, conflicto } = validarCita(datos, citaId);
   if (Object.keys(errores).length > 0) {
@@ -122,7 +114,6 @@ function comprobarCita(datos, citaId = null) {
   }
 }
 
-// Deja solo los campos de la cita que se guardan.
 function datosCita(datos) {
   return {
     mascotaId: Number(datos.mascotaId),
@@ -133,7 +124,6 @@ function datosCita(datos) {
   };
 }
 
-// Busca la cita y comprueba que siga pendiente.
 function buscarCitaPendiente(id, accion) {
   const cita = almacen.buscarPorId("citas", id);
   if (!cita) throw new ErrorHttp(404, "La cita no existe.");
@@ -143,12 +133,10 @@ function buscarCitaPendiente(id, accion) {
   return cita;
 }
 
-// Cómo se escribe una ruta:
-//   - recibe "peticion" con: params (de la URL), query (?estado=...) y cuerpo (JSON enviado)
-//   - devuelve { estado, datos }  (estado es opcional, por defecto 200)
-//   - para responder con error: throw new ErrorHttp(codigo, "mensaje", { campo: "mensaje" })
+// Cada ruta recibe { params, query, cuerpo } y devuelve { estado, datos } (estado por defecto 200).
+// Para errores: throw new ErrorHttp(codigo, "mensaje", { campo: "mensaje" })
 function registrarRutasCitas(enrutador) {
-  // Filtros opcionales: /api/citas?estado=pendiente&fecha=2026-10-30&mascotaId=2
+  // ej: /api/citas?estado=pendiente&fecha=2026-10-30&mascotaId=2
   enrutador.get("/api/citas", (peticion) => {
     const { estado, fecha, mascotaId } = peticion.query;
 
@@ -169,9 +157,8 @@ function registrarRutasCitas(enrutador) {
     return { datos: citas };
   });
 
-  // Horarios de un día y si están libres: /api/citas/horarios?fecha=2026-10-30
-  // Al modificar una cita se agrega &excluir=ID para que su propio horario aparezca libre.
-  // Va antes de /api/citas/:id para que "horarios" no se lea como un id.
+  // al editar se manda &excluir=ID para que su propia hora salga libre.
+  // tiene que ir antes de /:id, si no "horarios" se lee como un id
   enrutador.get("/api/citas/horarios", (peticion) => {
     const { fecha, excluir } = peticion.query;
     const mensaje = errorFecha(fecha);

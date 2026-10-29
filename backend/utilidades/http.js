@@ -1,10 +1,7 @@
-// Tamaño máximo del cuerpo de una petición (100 KB). Evita que alguien
-// envíe datos enormes y deje al servidor sin memoria.
+// 100 KB, para que no nos manden algo gigante
 const LIMITE_CUERPO = 100 * 1024;
 
-// Error con código HTTP. Las rutas lo lanzan con throw y server.js
-// lo convierte en una respuesta JSON.
-//   errores: { campo: "mensaje" } para marcar campos de un formulario.
+// Las rutas lo lanzan con throw y server.js lo responde como JSON
 class ErrorHttp extends Error {
   constructor(estado, mensaje, errores = null) {
     super(mensaje);
@@ -18,24 +15,21 @@ function enviarJSON(res, estado, datos) {
   res.end(JSON.stringify(datos));
 }
 
-// Formato de todos los errores de la API:
-//   { "error": "mensaje general", "errores": { "campo": "mensaje" } }
+// { error: "mensaje", errores: { campo: "mensaje" } }
 function enviarError(res, estado, mensaje, errores = null) {
   const cuerpo = { error: mensaje };
   if (errores) cuerpo.errores = errores;
   enviarJSON(res, estado, cuerpo);
 }
 
-// En Node el cuerpo de una petición llega en partes ("chunks").
-// Esta función las junta y convierte el texto JSON en un objeto.
+// En Node el cuerpo llega por partes, hay que juntarlo
 function leerCuerpo(req) {
   return new Promise((resolver, rechazar) => {
     let texto = "";
     let demasiadoGrande = false;
     req.setEncoding("utf8");
 
-    // Si se pasa del límite se deja de guardar, pero se termina de recibir
-    // para poder responder con un error 413 en vez de cortar la conexión.
+    // seguimos recibiendo para alcanzar a responder 413 en vez de cortar
     req.on("data", (parte) => {
       if (demasiadoGrande) return;
       texto += parte;

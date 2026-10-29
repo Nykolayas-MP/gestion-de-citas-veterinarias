@@ -27,6 +27,9 @@ function registrarRutasAtenciones(enrutador) {
 
   enrutador.post("/api/atenciones", (peticion) => {
     const datos = peticion.cuerpo;
+    if (!esRequerido(datos.citaId)) {
+      throw new ErrorHttp(400, "Indica la cita que se está atendiendo.", { citaId: "Indica la cita que se está atendiendo." });
+    }
     const cita = almacen.buscarPorId("citas", datos.citaId);
     if (!cita) throw new ErrorHttp(404, "La cita no existe.");
     if (cita.estado !== "pendiente") throw new ErrorHttp(409, "La cita ya fue atendida o cancelada.");

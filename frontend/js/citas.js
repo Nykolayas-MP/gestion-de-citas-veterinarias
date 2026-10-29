@@ -1,4 +1,4 @@
-// Estado actual de los filtros. La tabla se dibuja a partir de este objeto.
+// la tabla se dibuja a partir de esto
 const filtros = {
   texto: "",
   estado: "todas",
@@ -6,14 +6,12 @@ const filtros = {
   rango: "todas", // "todas" | "hoy" | "proximas" | "pasadas"
 };
 
-// Datos traídos del servidor al cargar la página.
 let citas = [];
 let mascotas = [];
 let duenos = [];
 
 /* ---------- Datos ---------- */
 
-// Las tres listas se piden al mismo tiempo para no esperar una tras otra.
 async function cargarDatos() {
   [citas, mascotas, duenos] = await Promise.all([
     api("GET", "/citas"),
@@ -22,7 +20,6 @@ async function cargarDatos() {
   ]);
 }
 
-// Une cada cita con su mascota y su dueño para no buscarlos varias veces.
 function obtenerCitasConDetalle() {
   return citas.map((cita) => {
     const mascota = mascotas.find((m) => m.id === cita.mascotaId) || null;
@@ -48,7 +45,6 @@ function cumpleFiltros(cita) {
   return true;
 }
 
-// Una cita pendiente cuya fecha ya pasó quedó sin actualizar.
 function estaVencida(cita) {
   return cita.estado === "pendiente" && cita.fecha < fechaLocalISO();
 }
@@ -65,7 +61,7 @@ function filaCita(cita) {
     ? ` <span class="etiqueta-vencida" title="La fecha ya pasó y la cita sigue pendiente">Vencida</span>`
     : "";
 
-  // Solo las citas pendientes se pueden editar o cancelar.
+  // solo las pendientes se pueden editar o cancelar
   const acciones =
     cita.estado === "pendiente"
       ? `<a href="nueva-cita.html?id=${cita.id}" class="btn-accion" title="Editar cita" aria-label="Editar cita de ${escaparHTML(cita.mascota?.nombre)}">
@@ -127,7 +123,6 @@ function iniciarFiltros() {
   const selectEstado = document.getElementById("filtro-estado");
   const inputFecha = document.getElementById("filtro-fecha");
 
-  // El filtro se aplica mientras se escribe, sin recargar la página.
   inputTexto.addEventListener("input", () => {
     filtros.texto = inputTexto.value;
     mostrarCitas();
@@ -138,7 +133,7 @@ function iniciarFiltros() {
     mostrarCitas();
   });
 
-  // Una fecha exacta reemplaza al rango ("Hoy", "Próximas"...).
+  // una fecha exacta pisa al rango (Hoy, Próximas...)
   inputFecha.addEventListener("change", () => {
     filtros.fecha = inputFecha.value;
     filtros.rango = "todas";
@@ -156,18 +151,17 @@ function iniciarFiltros() {
     mostrarCitas();
   });
 
-  // El botón "reset" limpia los campos; aquí se limpia también el objeto filtros.
+  // el reset limpia los inputs, pero el objeto filtros hay que limpiarlo a mano
   formulario.addEventListener("reset", () => {
     Object.assign(filtros, { texto: "", estado: "todas", fecha: "", rango: "todas" });
     marcarChipActivo("todas");
-    // Se espera a que el navegador termine de vaciar los campos.
+    // esperamos a que el navegador vacíe los campos
     setTimeout(mostrarCitas);
   });
 
-  // Evita que Enter en el buscador recargue la página.
   formulario.addEventListener("submit", (evento) => evento.preventDefault());
 
-  // Permite llegar ya filtrado, por ejemplo: citas.html?estado=pendiente
+  // ej: citas.html?estado=pendiente
   const estadoURL = obtenerParametroURL("estado");
   if (ESTADOS_CITA.includes(estadoURL)) {
     filtros.estado = estadoURL;
@@ -178,8 +172,7 @@ function iniciarFiltros() {
 /* ---------- Cancelar cita ---------- */
 
 function iniciarAcciones() {
-  // Un solo listener en la tabla atiende los botones de todas las filas
-  // (delegación de eventos), aunque la tabla se vuelva a dibujar.
+  // delegación de eventos: un solo listener para todas las filas
   document.getElementById("tabla-citas").addEventListener("click", async (evento) => {
     const boton = evento.target.closest('[data-accion="cancelar"]');
     if (!boton) return;
@@ -206,7 +199,7 @@ function iniciarAcciones() {
       mostrarMensaje(`La cita de ${nombre} fue cancelada.`, "exito");
     } catch (error) {
       mostrarErroresServidor(error);
-      // Si alguien la cambió desde otra pestaña, se vuelve a cargar la lista.
+      // la cambiaron desde otra pestaña, recargamos
       if (error.estado === 404 || error.estado === 409) {
         await cargarDatos();
         mostrarCitas();

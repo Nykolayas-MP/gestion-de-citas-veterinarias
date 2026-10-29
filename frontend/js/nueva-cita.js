@@ -10,23 +10,19 @@ const MOTIVOS = [
 const MAX_DIAS_ANTICIPACION = 90;
 const MAX_OBSERVACIONES = 200;
 
-// Cita que se está modificando (null cuando se agenda una nueva).
+// null si es una cita nueva
 let citaEditando = null;
 
-// Datos traídos del servidor al cargar la página.
 let duenos = [];
 let mascotas = [];
 let citas = [];
 
-// Horarios del día elegido, tal como los entrega el servidor:
-// [{ hora: "09:00", disponible: true }, { hora: "09:30", disponible: false, motivo: "ocupado" }, ...]
+// ej: [{ hora: "09:00", disponible: true }, { hora: "09:30", disponible: false, motivo: "ocupado" }]
 let horarios = [];
 
-// Cuenta las veces que se piden horarios. Si el usuario cambia de fecha rápido,
-// permite ignorar la respuesta de una fecha que ya no está elegida.
+// si cambian de fecha rápido, ignoramos respuestas viejas
 let pedidoHoras = 0;
 
-// Referencias a los campos del formulario.
 const campos = {
   dueno: document.getElementById("dueno"),
   mascota: document.getElementById("mascota"),
@@ -47,7 +43,6 @@ function buscarMascota(id) {
 
 /* ---------- Datos ---------- */
 
-// Las tres listas se piden al mismo tiempo para no esperar una tras otra.
 async function cargarDatos() {
   [duenos, mascotas, citas] = await Promise.all([
     api("GET", "/duenos"),
@@ -58,8 +53,7 @@ async function cargarDatos() {
 
 /* ---------- Reglas de negocio ---------- */
 
-// Otra cita pendiente de la misma mascota ese día (o null).
-// No cuenta la cita que se está modificando.
+// otra cita pendiente de la misma mascota ese día (sin contar la que se edita)
 function citaDeMascotaEseDia(mascotaId, fecha) {
   return (
     citas.find(
@@ -101,7 +95,7 @@ function llenarMascotas() {
   );
   campos.mascota.disabled = false;
 
-  // Si el dueño tiene una sola mascota, se elige automáticamente.
+  // si tiene una sola mascota, la dejamos elegida
   if (delDueno.length === 1) campos.mascota.value = delDueno[0].id;
 }
 
@@ -111,7 +105,6 @@ function bloquearHoras(texto) {
   campos.hora.disabled = true;
 }
 
-// Pide al servidor los horarios del día y llena la lista de horas.
 async function llenarHoras() {
   const fecha = campos.fecha.value;
   const horaElegida = campos.hora.value;
@@ -120,7 +113,6 @@ async function llenarHoras() {
   horarios = [];
   ayuda.textContent = "";
 
-  // Sin fecha válida no tiene sentido mostrar horarios.
   if (!fecha || !esFechaNoPasada(fecha) || fecha > fechaMaxima() || !esDiaHabil(fecha)) {
     bloquearHoras("Primero elige una fecha válida");
     return;
@@ -148,7 +140,7 @@ async function llenarHoras() {
   });
   campos.hora.disabled = false;
 
-  // Mantiene la hora elegida si sigue disponible en la nueva fecha.
+  // si la hora elegida sigue libre, no la perdemos
   if (horarios.some((h) => h.hora === horaElegida && h.disponible)) campos.hora.value = horaElegida;
 
   const disponibles = horarios.filter((h) => h.disponible).length;
@@ -164,8 +156,7 @@ function llenarMotivos() {
 
 /* ---------- Validaciones ---------- */
 
-// Devuelve el mensaje de error del campo, o "" si es válido.
-// El servidor vuelve a revisar todo al guardar.
+// "" si está bien. El servidor igual vuelve a revisar todo
 function validarCampo(nombre) {
   const valor = campos[nombre].value.trim();
 
@@ -218,7 +209,6 @@ function validarCampo(nombre) {
   }
 }
 
-// Valida un campo y muestra u oculta su mensaje de error. Devuelve true si es válido.
 function aplicarValidacion(nombre) {
   const mensaje = validarCampo(nombre);
   if (mensaje) mostrarErrorCampo(campos[nombre], mensaje);
@@ -254,7 +244,7 @@ function iniciarEventos() {
 
   campos.mascota.addEventListener("change", () => {
     aplicarValidacion("mascota");
-    // Cambiar de mascota puede resolver (o crear) un choque de fecha.
+    // cambiar de mascota puede crear o quitar un choque de fecha
     if (campos.fecha.value) aplicarValidacion("fecha");
   });
 
@@ -274,7 +264,6 @@ function iniciarEventos() {
 
   campos.observaciones.addEventListener("input", actualizarContador);
 
-  // Al salir de un campo con error, se vuelve a revisar.
   Object.keys(campos).forEach((nombre) => {
     campos[nombre].addEventListener("blur", () => {
       if (campos[nombre].classList.contains("is-invalid") || campos[nombre].value) {
@@ -293,11 +282,11 @@ async function guardarCita(evento) {
   const boton = document.getElementById("btn-guardar");
   if (boton.disabled) return;
 
-  // Se vuelven a pedir los horarios por si alguien tomó uno mientras se llenaba el formulario.
+  // por si alguien tomó la hora mientras llenaban el formulario
   const horaElegida = campos.hora.value;
   if (campos.fecha.value) await llenarHoras();
 
-  // Se validan todos los campos (map, no some, para marcar todos los errores a la vez).
+  // map y no some, para que marque todos los errores de una
   const resultados = Object.keys(campos).map(aplicarValidacion);
   if (horaElegida && !campos.hora.value) {
     mostrarErrorCampo(campos.hora, `La hora ${horaElegida} se acaba de ocupar. Elige otra.`);
@@ -317,7 +306,7 @@ async function guardarCita(evento) {
     observaciones: campos.observaciones.value.trim(),
   };
 
-  // El botón se desactiva mientras responde el servidor para no agendar dos veces.
+  // así no se agenda dos veces con doble clic
   boton.disabled = true;
   try {
     const cita = citaEditando
@@ -325,7 +314,7 @@ async function guardarCita(evento) {
       : await api("POST", "/citas", datos);
     mostrarConfirmacion(cita, Boolean(citaEditando));
   } catch (error) {
-    // 409: otra persona tomó el horario. Se actualiza la lista de horas.
+    // 409: otra persona tomó la hora, refrescamos la lista
     if (error.estado === 409 && error.errores.hora) await llenarHoras();
     mostrarErroresServidor(error, {
       mascotaId: campos.mascota,
@@ -419,7 +408,7 @@ async function cargarCitaParaEditar(id) {
   if (MOTIVOS.includes(cita.motivo)) {
     campos.motivo.value = cita.motivo;
   } else {
-    // Motivos escritos a mano se muestran en "Otro".
+    // si el motivo se escribió a mano, va en "Otro"
     campos.motivo.value = "Otro";
     mostrarCampoMotivoOtro();
     campos.motivoOtro.value = cita.motivo;
@@ -428,7 +417,7 @@ async function cargarCitaParaEditar(id) {
   campos.observaciones.value = cita.observaciones || "";
   actualizarContador();
 
-  // Una cita pendiente con fecha pasada debe cambiar de fecha para guardarse.
+  // si la fecha ya pasó hay que cambiarla para poder guardar
   if (!esFechaNoPasada(cita.fecha)) {
     aplicarValidacion("fecha");
     mostrarMensaje("Esta cita quedó con una fecha pasada. Elige una nueva fecha.", "info", 6000);
@@ -436,7 +425,7 @@ async function cargarCitaParaEditar(id) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Límites del calendario: desde hoy hasta 90 días más.
+  // calendario: desde hoy hasta 90 días
   campos.fecha.min = fechaLocalISO();
   campos.fecha.max = fechaMaxima();
 

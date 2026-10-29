@@ -1,5 +1,4 @@
-// Fecha en formato "YYYY-MM-DD" usando la hora local
-// (toISOString() usa UTC y puede entregar el día equivocado).
+// toISOString() usa UTC y a veces da el día equivocado, por eso la hora local
 function fechaLocalISO(fecha = new Date()) {
   const anio = fecha.getFullYear();
   const mes = String(fecha.getMonth() + 1).padStart(2, "0");
@@ -7,14 +6,13 @@ function fechaLocalISO(fecha = new Date()) {
   return `${anio}-${mes}-${dia}`;
 }
 
-// Fecha desplazada N días desde hoy (negativo = pasado).
+// negativo = días atrás
 function fechaRelativa(dias) {
   const fecha = new Date();
   fecha.setDate(fecha.getDate() + dias);
   return fechaLocalISO(fecha);
 }
 
-// Hora actual en formato "HH:MM".
 function horaActual() {
   const ahora = new Date();
   const horas = String(ahora.getHours()).padStart(2, "0");

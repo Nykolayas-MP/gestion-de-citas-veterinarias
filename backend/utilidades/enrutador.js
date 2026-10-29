@@ -1,11 +1,6 @@
-// Enrutador: guarda qué función atiende cada combinación de método y URL.
-//
-// Uso:
-//   enrutador.get("/api/citas/:id", (peticion) => { ... peticion.params.id ... });
-//
-// Las partes que empiezan con ":" son parámetros y se entregan en peticion.params.
-// Importante: las rutas se revisan en el orden en que se registran, así que
-// "/api/citas/horarios" debe registrarse ANTES que "/api/citas/:id".
+// Guarda qué función atiende cada método + URL.
+// Lo que empieza con ":" es parámetro: /api/citas/:id → peticion.params.id
+// Ojo: se revisan en orden, por eso /api/citas/horarios va antes que /api/citas/:id
 function crearEnrutador() {
   const rutas = [];
 
@@ -17,7 +12,6 @@ function crearEnrutador() {
     rutas.push({ metodo, partes: separar(patron), manejador });
   }
 
-  // Compara un patrón con una URL. Devuelve los parámetros o null si no coincide.
   function coincidir(partesPatron, partesUrl) {
     if (partesPatron.length !== partesUrl.length) return null;
     const params = {};
@@ -32,8 +26,7 @@ function crearEnrutador() {
     return params;
   }
 
-  // Busca la función que atiende esta petición.
-  // Devuelve { manejador, params }, o null si no existe.
+  // devuelve { manejador, params } o null
   function resolver(metodo, ruta) {
     const partesUrl = separar(ruta);
     for (const r of rutas) {
@@ -44,7 +37,7 @@ function crearEnrutador() {
     return null;
   }
 
-  // true si la URL existe con algún método (sirve para responder 405 en vez de 404).
+  // sirve para responder 405 en vez de 404
   function existeRuta(ruta) {
     const partesUrl = separar(ruta);
     return rutas.some((r) => coincidir(r.partes, partesUrl) !== null);

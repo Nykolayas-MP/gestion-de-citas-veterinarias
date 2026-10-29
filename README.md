@@ -67,15 +67,7 @@ Las páginas de detalle reciben el dato que necesitan por la URL. `mascota.html?
 
 ### Cómo abrirlo
 
-Lo más simple es abrir `frontend/index.html` con doble clic. Si usas VS Code, la extensión Live Server también sirve. Otra opción es levantar un servidor con Python:
-
-```bash
-python -m http.server 5500 --directory frontend
-```
-
-y entrar a <http://localhost:5500>.
-
-La primera vez se cargan datos de ejemplo: tres dueños, cuatro mascotas y algunas citas. Para volver a ese estado, escribe `reiniciarDatos()` en la consola del navegador.
+En el Taller 1 bastaba con abrir `frontend/index.html` con doble clic. Desde el Taller 2 las páginas piden los datos al servidor, así que hay que encenderlo como se explica en la sección siguiente.
 
 ## Taller 2: backend
 
@@ -94,6 +86,24 @@ npm start
 y entrar a <http://localhost:3000>. El mismo servidor entrega las páginas y responde la API, así que no hace falta Live Server. Mientras se programa conviene usar `npm run dev`, que reinicia el servidor solo cada vez que se guarda un archivo.
 
 En la consola aparece cada petición con su resultado, por ejemplo `GET /api/citas → 200`.
+
+### Arquitectura
+
+![Arquitectura de VetCitas](docs/taller2/diagrama%20de%20la%20arquitectura.png)
+
+El diagrama se lee de izquierda a derecha: el navegador, el servidor y los datos.
+
+Al servidor le llegan dos tipos de peticiones. Cuando alguien abre `citas.html`, está pidiendo un archivo. `server.js` se lo encarga a `archivos.js`, que lo busca en la carpeta `frontend/` y lo entrega. Cuando la URL empieza con `/api`, lo que se piden son datos, y ahí empieza el camino de la columna del medio. `http.js` lee el JSON que llegó, el enrutador busca qué función atiende esa URL y la ruta hace el trabajo.
+
+Las cajas que están a la derecha dentro del servidor no son pasos del camino. Son cosas que se consultan mientras se recorre. La que más nos costó ubicar fue `validaciones.js`. Al principio la dibujamos como un paso más después de las rutas, y no lo es. La ruta le pregunta "¿esta fecha cae en domingo?" o "¿este RUT es válido?", y validaciones solo contesta sí o no. Quien decide si responder 400 o 409 es la ruta. Quien envía la respuesta es `server.js`, a través de `http.js`.
+
+Los datos viven en `almacen.js`. Las rutas le piden guardar o buscar algo y reciben una copia, nunca el dato original, así ninguna lo cambia por accidente.
+
+Lo punteado es lo que viene. En el Taller 3 una base de datos reemplaza a `almacen.js` y no hay que tocar nada más, porque las rutas solo usan sus funciones: listar, buscar, insertar, actualizar y eliminar. En el Taller 4 la app móvil va a usar la misma API que la página. Por eso el servidor ya acepta peticiones desde otros orígenes (CORS).
+
+Debajo del diagrama hay un ejemplo de punta a punta: lo que pasa desde que alguien aprieta "Agendar cita" hasta que ve "¡Cita agendada!".
+
+Lo hicimos en draw.io. El archivo original está en [docs/taller2/arquitectura.drawio](docs/taller2/arquitectura.drawio), por si hay que cambiarlo.
 
 ### Cómo está organizado
 
@@ -115,6 +125,8 @@ backend/
 
 Del lado del navegador, `data.js` tiene la función `api()`, que envía la petición con `fetch()` y devuelve la respuesta. Si el servidor rechaza los datos, `mostrarErroresServidor()` (en `ui.js`) marca cada error bajo su campo, igual que las validaciones del navegador.
 
+En el Taller 1 pensamos que bastaría con cambiar el interior de las funciones de `data.js`. No fue así: `fetch()` es asíncrono, y cada página tuvo que aprender a esperar la respuesta con `await` y a mostrar los errores del servidor. Por eso las páginas llaman a `api()` directamente y `data.js` quedó solo con esa función y las utilidades de fecha.
+
 Validamos dos veces a propósito. El navegador avisa rápido mientras se llena el formulario, pero cualquiera puede saltárselo y llamar a la API directamente, así que el servidor no confía en nada de lo que recibe.
 
 ### Respuestas de la API
@@ -129,3 +141,48 @@ Las respuestas siempre vienen en JSON. Cuando algo sale mal, el código HTTP dic
 ```
 
 Usamos `400` cuando los datos vienen mal, `404` cuando lo que se busca no existe, `405` cuando la URL existe pero no con ese método, `409` cuando hay un choque (un horario ya tomado o un RUT repetido) y `500` si algo falla dentro del servidor.
+
+### Rutas de la API
+
+| Método | Ruta | Qué hace |
+|---|---|---|
+| GET | `/api/salud` | Comprueba que el servidor está encendido |
+| GET | `/api/citas` | Lista las citas. Acepta `?estado=`, `?fecha=` y `?mascotaId=` |
+| GET | `/api/citas/horarios?fecha=` | Horarios del día y si están libres. Al editar se agrega `&excluir=ID` |
+| GET | `/api/citas/:id` | Una cita |
+| POST | `/api/citas` | Agenda una cita (409 si el horario está tomado) |
+| PUT | `/api/citas/:id` | Modifica una cita pendiente |
+| PATCH | `/api/citas/:id/cancelar` | Cancela una cita pendiente |
+| GET | `/api/duenos` | Lista los dueños |
+| GET | `/api/duenos/:id` | Un dueño |
+| POST | `/api/duenos` | Registra un dueño (409 si el RUT ya existe) |
+| GET | `/api/mascotas` | Lista las mascotas. Acepta `?duenoId=` |
+| GET | `/api/mascotas/:id` | Una mascota |
+| POST | `/api/mascotas` | Registra una mascota (409 si el dueño ya tiene una con ese nombre) |
+| PUT | `/api/mascotas/:id` | Modifica una mascota |
+| DELETE | `/api/mascotas/:id` | Elimina la mascota junto con sus citas y atenciones |
+| GET | `/api/mascotas/:id/atenciones` | Historial clínico de una mascota |
+| POST | `/api/atenciones` | Registra una atención y deja la cita como atendida |
+
+### Evidencia de funcionamiento
+
+Las capturas están en `docs/taller2/`.
+
+1. [Listado de mascotas](docs/taller2/01-listado-mascotas.png) cargado desde el servidor.
+2. [RUT inválido](docs/taller2/02-error-rut-invalido.png): el dígito verificador no coincide.
+3. [Registro de una mascota](docs/taller2/03-registro-mascota.png).
+4. [Nombre repetido](docs/taller2/04-error-nombre-repetido.png) para el mismo dueño.
+5. [RUT repetido](docs/taller2/05-servidor-rut-repetido-409.png): el servidor responde 409.
+6. [Ficha de la mascota](docs/taller2/06-ficha-mascota.png).
+7. [Registro de una atención](docs/taller2/07-registro-atencion.png).
+8. [Edición de una mascota](docs/taller2/08-editar-mascota.png).
+9. [Confirmación antes de eliminar](docs/taller2/09-confirmar-eliminacion.png).
+10. [Mascota eliminada](docs/taller2/10-mascota-eliminada.png).
+11. [Listado de citas](docs/taller2/11-listado-citas.png) cargado desde el servidor (`GET /api/citas → 200`).
+12. [Horarios del día](docs/taller2/12-horarios-ocupados.png): los que ya pasaron y los ocupados no se pueden elegir.
+13. [Domingo rechazado](docs/taller2/13-error-domingo.png): "La clínica no atiende los domingos".
+14. [Cita agendada](docs/taller2/14-cita-agendada.png) (`POST /api/citas → 201`).
+15. [Hora tomada](docs/taller2/15-horario-tomado-409.png) por otra persona mientras se llenaba el formulario.
+16. [Cita modificada](docs/taller2/16-modificar-cita.png) (`PUT /api/citas/3 → 200`).
+17. [Cita cancelada](docs/taller2/17-confirmar-cancelacion.png) (`PATCH /api/citas/6/cancelar → 200`).
+18. [La terminal del servidor](docs/taller2/18-terminal-servidor.png) con cada petición y su código.

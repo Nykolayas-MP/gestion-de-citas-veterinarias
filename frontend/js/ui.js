@@ -1,7 +1,6 @@
 /* ---------- Mensajes / alertas ---------- */
 
-// Muestra un mensaje en el contenedor #mensajes de la página.
-// tipo: "exito" | "error" | "info"
+// tipo: "exito", "error" o "info"
 function mostrarMensaje(texto, tipo = "info", duracionMs = 4000) {
   const contenedor = document.getElementById("mensajes");
   if (!contenedor) return;
@@ -27,8 +26,7 @@ function mostrarMensaje(texto, tipo = "info", duracionMs = 4000) {
   if (duracionMs > 0) setTimeout(() => alerta.remove(), duracionMs);
 }
 
-// Guarda un mensaje para mostrarlo en la siguiente página
-// (por ejemplo, después de guardar un formulario y redirigir).
+// para mostrarlo después de redirigir a otra página
 function mensajeParaSiguientePagina(texto, tipo = "exito") {
   sessionStorage.setItem("vet_mensaje", JSON.stringify({ texto, tipo }));
 }
@@ -43,8 +41,7 @@ function mostrarMensajePendiente() {
 
 /* ---------- Errores en formularios ---------- */
 
-// Marca un campo como inválido y muestra el texto de error bajo él.
-// Usa las clases de Bootstrap "is-invalid" e "invalid-feedback".
+// usa is-invalid e invalid-feedback de Bootstrap
 function mostrarErrorCampo(campo, texto) {
   campo.classList.add("is-invalid");
   campo.setAttribute("aria-invalid", "true");
@@ -69,9 +66,8 @@ function limpiarErroresFormulario(formulario) {
   formulario.querySelectorAll(".is-invalid").forEach(limpiarErrorCampo);
 }
 
-// Muestra un error del servidor (ErrorApi). Cada mensaje por campo se marca
-// bajo su campo; "campos" relaciona el nombre que usa el servidor con el elemento.
-// Ej: mostrarErroresServidor(error, { mascotaId: campos.mascota, fecha: campos.fecha })
+// campos: nombre del campo en el servidor → elemento del formulario
+// ej: mostrarErroresServidor(error, { mascotaId: campos.mascota, fecha: campos.fecha })
 function mostrarErroresServidor(error, campos = {}) {
   const errores = error.errores || {};
   let primerCampo = null;
@@ -87,7 +83,6 @@ function mostrarErroresServidor(error, campos = {}) {
   mostrarMensaje(error.message || "Ocurrió un error inesperado.", "error");
 }
 
-// Crea un <option> para llenar listas desplegables desde JavaScript.
 function crearOpcion(valor, texto, deshabilitada = false) {
   const opcion = document.createElement("option");
   opcion.value = valor;
@@ -98,8 +93,7 @@ function crearOpcion(valor, texto, deshabilitada = false) {
 
 /* ---------- Modal de confirmación ---------- */
 
-// Abre un modal y devuelve una Promise que resuelve true (Aceptar) o false (Cancelar).
-// Uso:  if (await confirmarAccion("¿Cancelar la cita?")) { ... }
+// uso: if (await confirmarAccion("¿Cancelar la cita?")) { ... }
 function confirmarAccion(mensaje, textoAceptar = "Aceptar") {
   return new Promise((resolver) => {
     const fondo = document.createElement("div");
@@ -157,21 +151,19 @@ function formatearFechaLarga(fechaISO) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-// Devuelve el HTML de la etiqueta de color según el estado de la cita.
 function etiquetaEstado(estado) {
   const texto = estado.charAt(0).toUpperCase() + estado.slice(1);
   return `<span class="estado estado-${estado}">${texto}</span>`;
 }
 
-// Escapa texto ingresado por el usuario antes de insertarlo con innerHTML.
+// antes de meter texto del usuario en innerHTML
 function escaparHTML(texto) {
   const div = document.createElement("div");
   div.textContent = String(texto ?? "");
   return div.innerHTML;
 }
 
-// Quita tildes y pasa a minúsculas para comparar textos sin importar cómo se escribieron.
-// Ej: normalizar("Muñoz") -> "munoz"
+// para buscar sin importar tildes: "Muñoz" -> "munoz"
 function normalizar(texto) {
   return String(texto ?? "")
     .normalize("NFD")
@@ -180,7 +172,7 @@ function normalizar(texto) {
     .trim();
 }
 
-// Pone en mayúscula la primera letra de cada palabra. Ej: "ana pérez" -> "Ana Pérez"
+// "ana pérez" -> "Ana Pérez"
 function capitalizar(texto) {
   return texto
     .trim()
@@ -196,17 +188,16 @@ function textoEdad(edad) {
   return `${edad} ${Number(edad) === 1 ? "año" : "años"}`;
 }
 
-// Lee un parámetro de la URL. Ej: mascota.html?id=3 -> obtenerParametroURL("id") = "3"
+// mascota.html?id=3 -> obtenerParametroURL("id") = "3"
 function obtenerParametroURL(nombre) {
   return new URLSearchParams(window.location.search).get(nombre);
 }
 
 /* ---------- Menú de navegación ---------- */
 
-// El botón hamburguesa lo maneja Bootstrap (data-bs-toggle="collapse").
+// el botón hamburguesa lo maneja Bootstrap
 function iniciarMenu() {
-  // Marca como activo el enlace de la página actual.
-  // mascota.html (detalle) se considera parte de "Mascotas".
+  // mascota.html cuenta como Mascotas
   let paginaActual = window.location.pathname.split("/").pop() || "index.html";
   if (paginaActual === "mascota.html") paginaActual = "mascotas.html";
 
@@ -217,7 +208,6 @@ function iniciarMenu() {
     }
   });
 
-  // Año actual en el pie de página.
   const anio = document.getElementById("anio-actual");
   if (anio) anio.textContent = new Date().getFullYear();
 }

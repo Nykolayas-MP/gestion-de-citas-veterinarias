@@ -10,7 +10,7 @@ const METODOS_CON_CUERPO = ["POST", "PUT", "PATCH"];
 const enrutador = crearEnrutador();
 registrarRutas(enrutador);
 
-// Permite que la app móvil del Taller 4 (u otra página) consuma la API.
+// CORS, para que la app del Taller 4 pueda usar la API
 function permitirOtrosOrigenes(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
@@ -20,7 +20,7 @@ function permitirOtrosOrigenes(res) {
 async function atenderApi(req, res, url) {
   const ruta = enrutador.resolver(req.method, url.pathname);
   if (!ruta) {
-    // 405: la URL existe pero no con ese método. 404: la URL no existe.
+    // si la URL existe con otro método es 405, si no 404
     return enrutador.existeRuta(url.pathname)
       ? enviarError(res, 405, `El método ${req.method} no está permitido en esta ruta.`)
       : enviarError(res, 404, "La ruta de la API no existe.");
@@ -38,7 +38,7 @@ async function atenderApi(req, res, url) {
     if (error instanceof ErrorHttp) {
       enviarError(res, error.estado, error.message, error.errores);
     } else {
-      // Error inesperado (un bug): se muestra en la consola y el servidor sigue funcionando.
+      // un bug: se ve en la consola y el servidor sigue arriba
       console.error(error);
       enviarError(res, 500, "Ocurrió un error interno en el servidor.");
     }
@@ -48,7 +48,6 @@ async function atenderApi(req, res, url) {
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
 
-  // Registro en consola de cada petición: método, ruta y código de respuesta.
   res.on("finish", () => {
     console.log(`${req.method} ${url.pathname}${url.search} → ${res.statusCode}`);
   });

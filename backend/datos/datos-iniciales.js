@@ -1,8 +1,6 @@
 const { fechaRelativa } = require("../utilidades/fechas");
 
-// Datos de ejemplo con los que parte el servidor cada vez que se enciende.
-// Las fechas de las citas se calculan desde hoy para que siempre haya
-// citas pasadas, de hoy y futuras.
+// Las fechas se calculan desde hoy para que siempre haya citas pasadas y futuras
 function crearDatosIniciales() {
   return {
     duenos: [
