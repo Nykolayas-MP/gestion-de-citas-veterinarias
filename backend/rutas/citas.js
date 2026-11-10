@@ -1,4 +1,4 @@
-const almacen = require("../datos/almacen");
+const { db } = require("../datos/db");
 const { ErrorHttp } = require("../utilidades/http");
 const { fechaLocalISO, horaActual } = require("../utilidades/fechas");
 const {
@@ -43,10 +43,13 @@ function generarHorarios() {
 
 // las canceladas no ocupan horario. excluirId es la cita que se está editando
 function citasActivasDelDia(fecha, excluirId = null) {
-  return almacen.listar(
-    "citas",
-    (c) => c.fecha === fecha && c.estado !== "cancelada" && c.id !== excluirId
-  );
+  return db
+    .prepare("SELECT * FROM citas WHERE fecha = ? AND estado <> 'cancelada' AND id IS NOT ?")
+    .all(fecha, excluirId);
+}
+
+function buscarCita(id) {
+  return db.prepare("SELECT * FROM citas WHERE id = ?").get(Number(id));
 }
 
 function esHoraPasada(fecha, hora) {
@@ -66,7 +69,7 @@ function errorFecha(fecha) {
 function validarCita(datos, citaId = null) {
   const errores = {};
 
-  const mascota = almacen.buscarPorId("mascotas", datos.mascotaId);
+  const mascota = db.prepare("SELECT * FROM mascotas WHERE id = ?").get(Number(datos.mascotaId));
   if (!esRequerido(datos.mascotaId)) errores.mascotaId = "Selecciona la mascota.";
   else if (!mascota) errores.mascotaId = "La mascota no existe.";
 
@@ -125,7 +128,7 @@ function datosCita(datos) {
 }
 
 function buscarCitaPendiente(id, accion) {
-  const cita = almacen.buscarPorId("citas", id);
+  const cita = buscarCita(id);
   if (!cita) throw new ErrorHttp(404, "La cita no existe.");
   if (cita.estado !== "pendiente") {
     throw new ErrorHttp(409, `Esta cita está ${cita.estado}. Solo las citas pendientes se pueden ${accion}.`);
@@ -147,14 +150,23 @@ function registrarRutasCitas(enrutador) {
       throw new ErrorHttp(400, "La fecha debe tener el formato AAAA-MM-DD.");
     }
 
-    const citas = almacen.listar(
-      "citas",
-      (c) =>
-        (!estado || c.estado === estado) &&
-        (!fecha || c.fecha === fecha) &&
-        (!mascotaId || c.mascotaId === Number(mascotaId))
-    );
-    return { datos: citas };
+    // el WHERE se arma solo con los filtros que vienen; los valores van siempre como ?
+    const condiciones = [];
+    const valores = [];
+    if (estado) {
+      condiciones.push("estado = ?");
+      valores.push(estado);
+    }
+    if (fecha) {
+      condiciones.push("fecha = ?");
+      valores.push(fecha);
+    }
+    if (mascotaId) {
+      condiciones.push("mascotaId = ?");
+      valores.push(Number(mascotaId));
+    }
+    const where = condiciones.length > 0 ? `WHERE ${condiciones.join(" AND ")}` : "";
+    return { datos: db.prepare(`SELECT * FROM citas ${where} ORDER BY id`).all(...valores) };
   });
 
   // al editar se manda &excluir=ID para que su propia hora salga libre.
@@ -174,26 +186,34 @@ function registrarRutasCitas(enrutador) {
   });
 
   enrutador.get("/api/citas/:id", (peticion) => {
-    const cita = almacen.buscarPorId("citas", peticion.params.id);
+    const cita = buscarCita(peticion.params.id);
     if (!cita) throw new ErrorHttp(404, "La cita no existe.");
     return { datos: cita };
   });
 
+  // el estado no se manda: la tabla lo deja en "pendiente" por defecto
   enrutador.post("/api/citas", (peticion) => {
     comprobarCita(peticion.cuerpo);
-    const cita = almacen.insertar("citas", { ...datosCita(peticion.cuerpo), estado: "pendiente" });
+    const { mascotaId, fecha, hora, motivo, observaciones } = datosCita(peticion.cuerpo);
+    const cita = db
+      .prepare("INSERT INTO citas (mascotaId, fecha, hora, motivo, observaciones) VALUES (?, ?, ?, ?, ?) RETURNING *")
+      .get(mascotaId, fecha, hora, motivo, observaciones);
     return { estado: 201, datos: cita };
   });
 
   enrutador.put("/api/citas/:id", (peticion) => {
     const cita = buscarCitaPendiente(peticion.params.id, "modificar");
     comprobarCita(peticion.cuerpo, cita.id);
-    return { datos: almacen.actualizar("citas", cita.id, datosCita(peticion.cuerpo)) };
+    const { mascotaId, fecha, hora, motivo, observaciones } = datosCita(peticion.cuerpo);
+    const actualizada = db
+      .prepare("UPDATE citas SET mascotaId = ?, fecha = ?, hora = ?, motivo = ?, observaciones = ? WHERE id = ? RETURNING *")
+      .get(mascotaId, fecha, hora, motivo, observaciones, cita.id);
+    return { datos: actualizada };
   });
 
   enrutador.patch("/api/citas/:id/cancelar", (peticion) => {
     const cita = buscarCitaPendiente(peticion.params.id, "cancelar");
-    return { datos: almacen.actualizar("citas", cita.id, { estado: "cancelada" }) };
+    return { datos: db.prepare("UPDATE citas SET estado = 'cancelada' WHERE id = ? RETURNING *").get(cita.id) };
   });
 }
 

@@ -186,3 +186,63 @@ Las capturas están en `docs/taller2/`.
 16. [Cita modificada](docs/taller2/16-modificar-cita.png) (`PUT /api/citas/3 → 200`).
 17. [Cita cancelada](docs/taller2/17-confirmar-cancelacion.png) (`PATCH /api/citas/6/cancelar → 200`).
 18. [La terminal del servidor](docs/taller2/18-terminal-servidor.png) con cada petición y su código.
+
+## Taller 3: base de datos
+
+Los datos ahora se guardan en SQLite. Lo elegimos porque viene dentro de Node.js desde la versión 22 (`node:sqlite`), así que seguimos sin instalar librerías. Tampoco hace falta levantar un servidor de base de datos aparte: toda la base es un archivo, `backend/datos/vetcitas.db`.
+
+### Cómo encenderlo
+
+Igual que antes, `npm start` desde la carpeta `backend`. Lo que cambia es que ahora se necesita Node.js 22.13 o más nuevo. Con `node -v` se ve qué versión hay instalada.
+
+La primera vez que arranca, el servidor crea el archivo, arma las tablas con `esquema.sql` y carga los datos de ejemplo. Las siguientes veces la base ya tiene datos y no se toca, así que lo que se registra sigue ahí después de apagar el servidor.
+
+Para volver a los datos de ejemplo hay que borrar `vetcitas.db` y encender el servidor otra vez. Conviene hacerlo de vez en cuando, porque las fechas de ejemplo se calculan el día en que se creó la base y, con los días, las citas de "hoy" quedan en el pasado.
+
+El archivo `.db` no se sube a GitHub (está en `.gitignore`). Cada uno tiene su propia base en su computador y así no nos pisamos los datos de prueba.
+
+### Modelo de datos
+
+![Modelo entidad-relación](docs/taller3/modelo-entidad-relacion.png)
+
+Son las mismas cuatro entidades del Taller 1, ahora convertidas en tablas: `duenos`, `mascotas`, `citas` y `atenciones`. Cada una apunta a la anterior con una clave foránea. La mascota guarda `duenoId`, la cita guarda `mascotaId` y la atención guarda `citaId`.
+
+Un dueño puede tener varias mascotas y una mascota puede tener varias citas. Entre la cita y la atención la relación es de uno a cero o uno: una cita pendiente todavía no tiene atención y una atendida tiene exactamente una. Eso último lo asegura el `UNIQUE` sobre `citaId`.
+
+En el Taller 2 cada atención guardaba también `mascotaId` y `fecha`. Los sacamos porque la cita ya tiene esos dos datos. Guardados dos veces, bastaba con que alguien corrigiera la mascota de una cita para que la atención siguiera diciendo otra cosa. Ahora el historial los obtiene de la cita con un `JOIN`, y la API los sigue entregando igual que antes.
+
+El diagrama está hecho en draw.io, en [docs/taller3/modelo-entidad-relacion.drawio](docs/taller3/modelo-entidad-relacion.drawio).
+
+### Reglas que también cuida la base
+
+Las validaciones de las rutas siguen siendo las mismas. Lo nuevo es que algunas reglas ahora también las revisa SQLite, así que si una ruta llegara a fallar, el dato malo no entra igual:
+
+- El RUT es `UNIQUE`.
+- El estado de la cita, la especie y la edad tienen un `CHECK` con los valores permitidos.
+- Hay un índice único sobre fecha y hora que ignora las citas canceladas. Así dos citas activas no pueden quedar a la misma hora, pero una hora cancelada se puede volver a tomar.
+- Las claves foráneas tienen `ON DELETE CASCADE`. Al borrar una mascota, la base borra sus citas, y con ellas sus atenciones. En el Taller 2 eso lo hacíamos a mano en la ruta, borrando lista por lista.
+
+Un detalle que nos pilló: SQLite viene con las claves foráneas apagadas. Si no se ejecuta `PRAGMA foreign_keys = ON` al abrir la base, las relaciones se ignoran y el borrado en cascada no hace nada.
+
+Otras reglas no se pueden escribir en SQL y se quedan en el código: que la cita no caiga en domingo, el dígito verificador del RUT o que un dueño no tenga dos mascotas llamadas "Luna" y "Lúna".
+
+### Lo que cambió en el código
+
+```
+backend/datos/
+├── esquema.sql           las tablas y sus reglas
+├── db.js                 abre la base, crea las tablas y carga los datos de ejemplo
+└── datos-iniciales.js    los datos de ejemplo
+```
+
+En el Taller 2 escribimos que bastaría con reemplazar `almacen.js` y no tocar nada más. Otra vez nos equivocamos, como con `data.js` en el Taller 1. Las rutas filtraban con funciones de JavaScript, por ejemplo `(c) => c.fecha === fecha && c.estado !== "cancelada"`, y eso no se puede traducir a SQL. Así que borramos `almacen.js` y cada ruta tiene ahora su propia consulta:
+
+```js
+db.prepare("SELECT * FROM citas WHERE fecha = ? AND estado <> 'cancelada' AND id IS NOT ?").all(fecha, excluirId);
+```
+
+Los valores nunca se pegan dentro del texto de la consulta. Van siempre como `?` y SQLite los recibe aparte. Si alguien escribe `'; DROP TABLE citas; --` en el motivo de una cita, se guarda como un motivo raro y nada más. Así se evita la inyección SQL.
+
+Registrar una atención hace dos cosas: guarda la atención y deja la cita como atendida. Las dos van dentro de una transacción. Si la segunda falla, la primera se deshace, y no queda una atención colgando de una cita que sigue pendiente.
+
+Las respuestas de la API no cambiaron ni en un campo, así que el frontend no se tocó.

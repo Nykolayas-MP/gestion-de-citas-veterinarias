@@ -1,6 +1,7 @@
 const { fechaRelativa } = require("../utilidades/fechas");
 
-// Las fechas se calculan desde hoy para que siempre haya citas pasadas y futuras
+// Se cargan en la base la primera vez que arranca el servidor.
+// Las fechas se calculan desde ese día, para que haya citas pasadas y futuras.
 function crearDatosIniciales() {
   return {
     duenos: [
@@ -26,7 +27,7 @@ function crearDatosIniciales() {
 
     atenciones: [
       {
-        id: 1, citaId: 1, mascotaId: 1, fecha: fechaRelativa(-7),
+        id: 1, citaId: 1,
         diagnostico: "Paciente sano, se aplica vacuna anual.",
         tratamiento: "Reposo de 24 horas.",
         medicamentos: "Vacuna antirrábica",

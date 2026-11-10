@@ -1,0 +1,3 @@
+# la base la crea el servidor al arrancar, cada uno tiene la suya
+*.db
+*.db-journal
