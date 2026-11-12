@@ -246,3 +246,21 @@ Los valores nunca se pegan dentro del texto de la consulta. Van siempre como `?`
 Registrar una atención hace dos cosas: guarda la atención y deja la cita como atendida. Las dos van dentro de una transacción. Si la segunda falla, la primera se deshace, y no queda una atención colgando de una cita que sigue pendiente.
 
 Las respuestas de la API no cambiaron ni en un campo, así que el frontend no se tocó.
+
+### Evidencia de funcionamiento
+
+Las capturas están en `docs/taller3/`.
+
+1. [La base de datos](docs/taller3/01-base-de-datos.png) creada con los datos de ejemplo.
+2. [Formulario con dueño nuevo](docs/taller3/02-formulario-dueno-nuevo.png).
+3. [Mascota registrada](docs/taller3/03-crear-mascota.png) (`POST /api/duenos → 201` y `POST /api/mascotas → 201`).
+4. [El dueño nuevo](docs/taller3/04-dueno-en-base.png) guardado en la tabla `duenos`.
+5. [La mascota nueva](docs/taller3/05-mascota-en-base.png) guardada en la tabla `mascotas`.
+6. [Ficha de la mascota](docs/taller3/06-consultar-ficha.png) cargada desde la base.
+7. [Mascota editada](docs/taller3/07-editar-mascota.png) (`PUT /api/mascotas/5 → 200`).
+8. [Los datos siguen ahí](docs/taller3/08-datos-persisten.png) después de reiniciar el servidor.
+9. [Registro de una atención](docs/taller3/09-registrar-atencion.png) (`POST /api/atenciones → 201`).
+10. [La cita queda atendida](docs/taller3/10-atencion-en-base.png) en la tabla `citas`.
+11. [Confirmación antes de eliminar](docs/taller3/11-confirmar-eliminacion.png).
+12. [Mascota eliminada](docs/taller3/12-mascota-eliminada-en-base.png) de la tabla `mascotas`.
+13. [Sus citas se borran solas](docs/taller3/13-cascada-citas-en-base.png) por el `ON DELETE CASCADE`.
