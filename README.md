@@ -186,3 +186,91 @@ Las capturas están en `docs/taller2/`.
 16. [Cita modificada](docs/taller2/16-modificar-cita.png) (`PUT /api/citas/3 → 200`).
 17. [Cita cancelada](docs/taller2/17-confirmar-cancelacion.png) (`PATCH /api/citas/6/cancelar → 200`).
 18. [La terminal del servidor](docs/taller2/18-terminal-servidor.png) con cada petición y su código.
+
+## Taller 3: base de datos
+
+Los datos ahora se guardan en SQLite. Lo elegimos porque viene dentro de Node.js desde la versión 22 (`node:sqlite`), así que seguimos sin instalar librerías. Tampoco hace falta levantar un servidor de base de datos aparte: toda la base es un archivo, `backend/datos/vetcitas.db`.
+
+### Cómo encenderlo
+
+Igual que antes, `npm start` desde la carpeta `backend`. Lo que cambia es que ahora se necesita Node.js 22.13 o más nuevo. Con `node -v` se ve qué versión hay instalada.
+
+La primera vez que arranca, el servidor crea el archivo, arma las tablas con `esquema.sql` y carga los datos de ejemplo. Las siguientes veces la base ya tiene datos y no se toca, así que lo que se registra sigue ahí después de apagar el servidor.
+
+Para volver a los datos de ejemplo hay que borrar `vetcitas.db` y encender el servidor otra vez. Conviene hacerlo de vez en cuando, porque las fechas de ejemplo se calculan el día en que se creó la base y, con los días, las citas de "hoy" quedan en el pasado.
+
+El archivo `.db` no se sube a GitHub (está en `.gitignore`). Cada uno tiene su propia base en su computador y así no nos pisamos los datos de prueba.
+
+### Modelo de datos
+
+![Modelo entidad-relación](docs/taller3/modelo-entidad-relacion.png)
+
+Son las mismas cuatro entidades del Taller 1, ahora convertidas en tablas: `duenos`, `mascotas`, `citas` y `atenciones`. Cada una apunta a la anterior con una clave foránea. La mascota guarda `duenoId`, la cita guarda `mascotaId` y la atención guarda `citaId`.
+
+Un dueño puede tener varias mascotas y una mascota puede tener varias citas. Entre la cita y la atención la relación es de uno a cero o uno: una cita pendiente todavía no tiene atención y una atendida tiene exactamente una. Eso último lo asegura el `UNIQUE` sobre `citaId`.
+
+En el Taller 2 cada atención guardaba también `mascotaId` y `fecha`. Los sacamos porque la cita ya tiene esos dos datos. Guardados dos veces, bastaba con que alguien corrigiera la mascota de una cita para que la atención siguiera diciendo otra cosa. Ahora el historial los obtiene de la cita con un `JOIN`, y la API los sigue entregando igual que antes.
+
+El diagrama está hecho en draw.io, en [docs/taller3/modelo-entidad-relacion.drawio](docs/taller3/modelo-entidad-relacion.drawio).
+
+### Reglas que también cuida la base
+
+Las validaciones de las rutas siguen siendo las mismas. Lo nuevo es que algunas reglas ahora también las revisa SQLite, así que si una ruta llegara a fallar, el dato malo no entra igual:
+
+- El RUT es `UNIQUE`.
+- El estado de la cita, la especie y la edad tienen un `CHECK` con los valores permitidos.
+- Hay un índice único sobre fecha y hora que ignora las citas canceladas. Así dos citas activas no pueden quedar a la misma hora, pero una hora cancelada se puede volver a tomar.
+- Las claves foráneas tienen `ON DELETE CASCADE`. Al borrar una mascota, la base borra sus citas, y con ellas sus atenciones. En el Taller 2 eso lo hacíamos a mano en la ruta, borrando lista por lista.
+
+Un detalle que nos pilló: SQLite viene con las claves foráneas apagadas. Si no se ejecuta `PRAGMA foreign_keys = ON` al abrir la base, las relaciones se ignoran y el borrado en cascada no hace nada.
+
+Otras reglas no se pueden escribir en SQL y se quedan en el código: que la cita no caiga en domingo, el dígito verificador del RUT o que un dueño no tenga dos mascotas llamadas "Luna" y "Lúna".
+
+### Lo que cambió en el código
+
+```
+backend/datos/
+├── esquema.sql           las tablas y sus reglas
+├── db.js                 abre la base, crea las tablas y carga los datos de ejemplo
+└── datos-iniciales.js    los datos de ejemplo
+```
+
+En el Taller 2 escribimos que bastaría con reemplazar `almacen.js` y no tocar nada más. Otra vez nos equivocamos, como con `data.js` en el Taller 1. Las rutas filtraban con funciones de JavaScript, por ejemplo `(c) => c.fecha === fecha && c.estado !== "cancelada"`, y eso no se puede traducir a SQL. Así que borramos `almacen.js` y cada ruta tiene ahora su propia consulta:
+
+```js
+db.prepare("SELECT * FROM citas WHERE fecha = ? AND estado <> 'cancelada' AND id IS NOT ?").all(fecha, excluirId);
+```
+
+Los valores nunca se pegan dentro del texto de la consulta. Van siempre como `?` y SQLite los recibe aparte. Si alguien escribe `'; DROP TABLE citas; --` en el motivo de una cita, se guarda como un motivo raro y nada más. Así se evita la inyección SQL.
+
+Registrar una atención hace dos cosas: guarda la atención y deja la cita como atendida. Las dos van dentro de una transacción. Si la segunda falla, la primera se deshace, y no queda una atención colgando de una cita que sigue pendiente.
+
+Las respuestas de la API no cambiaron ni en un campo, así que el frontend no se tocó.
+
+### Evidencia de funcionamiento
+
+Las capturas están en `docs/taller3/`.
+
+1. [La base de datos](docs/taller3/01-base-de-datos.png) creada con los datos de ejemplo.
+2. [Formulario con dueño nuevo](docs/taller3/02-formulario-dueno-nuevo.png).
+3. [Mascota registrada](docs/taller3/03-crear-mascota.png) (`POST /api/duenos → 201` y `POST /api/mascotas → 201`).
+4. [El dueño nuevo](docs/taller3/04-dueno-en-base.png) guardado en la tabla `duenos`.
+5. [La mascota nueva](docs/taller3/05-mascota-en-base.png) guardada en la tabla `mascotas`.
+6. [Ficha de la mascota](docs/taller3/06-consultar-ficha.png) cargada desde la base.
+7. [Mascota editada](docs/taller3/07-editar-mascota.png) (`PUT /api/mascotas/5 → 200`).
+8. [Los datos siguen ahí](docs/taller3/08-datos-persisten.png) después de reiniciar el servidor.
+9. [Registro de una atención](docs/taller3/09-registrar-atencion.png) (`POST /api/atenciones → 201`).
+10. [La cita queda atendida](docs/taller3/10-atencion-en-base.png) en la tabla `citas`.
+11. [Confirmación antes de eliminar](docs/taller3/11-confirmar-eliminacion.png).
+12. [Mascota eliminada](docs/taller3/12-mascota-eliminada-en-base.png) de la tabla `mascotas`.
+13. [Sus citas se borran solas](docs/taller3/13-cascada-citas-en-base.png) por el `ON DELETE CASCADE`.
+14. [La tabla `citas`](docs/taller3/14-citas-en-base.png) con las citas de ejemplo.
+15. [Cita agendada](docs/taller3/15-agendar-cita.png) desde el formulario (`POST /api/citas → 201`).
+16. [La cita nueva](docs/taller3/16-cita-nueva-en-base.png) en la tabla. Queda como pendiente sin que la página lo mande, porque ese es el valor por defecto de la columna.
+17. [Horario ocupado](docs/taller3/17-horario-ocupado.png): al agendar otra cita el mismo día, la hora recién tomada ya no se puede elegir.
+18. [Cita modificada](docs/taller3/18-modificar-cita.png) (`PUT /api/citas/6 → 200`).
+19. [El cambio en la base](docs/taller3/19-cita-modificada-en-base.png): misma fila, mismo id, datos nuevos.
+20. [Cita cancelada](docs/taller3/20-cancelar-cita.png) (`PATCH /api/citas/6/cancelar → 200`).
+21. [La cita cancelada en la base](docs/taller3/21-cita-cancelada-en-base.png). La fila no se borra, solo cambia su estado.
+22. [La hora se libera](docs/taller3/22-horario-liberado.png): como las canceladas no ocupan horario, se puede volver a tomar.
+23. [Filtro por estado](docs/taller3/23-filtro-pendientes.png) pedido directo a la API (`GET /api/citas?estado=pendiente → 200`). El filtro se convierte en `WHERE estado = ?` y la base devuelve solo las pendientes.

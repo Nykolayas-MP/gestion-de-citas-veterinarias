@@ -1,4 +1,4 @@
-const almacen = require("../datos/almacen");
+const { db } = require("../datos/db");
 const { ErrorHttp } = require("../utilidades/http");
 const { texto, esRequerido, esTextoValido, esRutValido, esTelefonoValido, esEmailValido } = require("../validaciones");
 
@@ -28,11 +28,11 @@ function validarDueno(datos) {
 
 function registrarRutasDuenos(enrutador) {
   enrutador.get("/api/duenos", () => ({
-    datos: almacen.listar("duenos"),
+    datos: db.prepare("SELECT * FROM duenos ORDER BY id").all(),
   }));
 
   enrutador.get("/api/duenos/:id", (peticion) => {
-    const dueno = almacen.buscarPorId("duenos", peticion.params.id);
+    const dueno = db.prepare("SELECT * FROM duenos WHERE id = ?").get(Number(peticion.params.id));
     if (!dueno) throw new ErrorHttp(404, "El dueño no existe.");
     return { datos: dueno };
   });
@@ -44,17 +44,17 @@ function registrarRutasDuenos(enrutador) {
       throw new ErrorHttp(400, "Revisa los datos del dueño.", errores);
     }
 
-    const repetido = almacen.listar("duenos").some((d) => limpiarRut(d.rut) === limpiarRut(datos.rut));
+    // el UNIQUE de la tabla no ve que 12.345.678-5 y 123456785 son el mismo RUT, por eso se limpia aquí también
+    const repetido = db
+      .prepare("SELECT id FROM duenos WHERE UPPER(REPLACE(REPLACE(rut, '.', ''), '-', '')) = ?")
+      .get(limpiarRut(datos.rut));
     if (repetido) {
       throw new ErrorHttp(409, "Ya existe un dueño con este RUT.", { rut: "Ya existe un dueño con este RUT." });
     }
 
-    const dueno = almacen.insertar("duenos", {
-      nombre: texto(datos.nombre),
-      rut: texto(datos.rut),
-      telefono: texto(datos.telefono),
-      email: texto(datos.email),
-    });
+    const dueno = db
+      .prepare("INSERT INTO duenos (nombre, rut, telefono, email) VALUES (?, ?, ?, ?) RETURNING *")
+      .get(texto(datos.nombre), texto(datos.rut), texto(datos.telefono), texto(datos.email));
     return { estado: 201, datos: dueno };
   });
 }

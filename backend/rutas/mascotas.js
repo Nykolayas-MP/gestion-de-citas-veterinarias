@@ -1,4 +1,4 @@
-const almacen = require("../datos/almacen");
+const { db } = require("../datos/db");
 const { ErrorHttp } = require("../utilidades/http");
 const { texto, esRequerido, esTextoValido, esNumeroEnRango, EDAD_MAXIMA } = require("../validaciones");
 
@@ -12,8 +12,10 @@ function normalizar(valor) {
 
 // excluirId: la mascota que se está editando
 function nombreRepetido(nombre, duenoId, excluirId = null) {
-  return almacen
-    .listar("mascotas", (m) => m.duenoId === duenoId && m.id !== excluirId)
+  // IS NOT y no <>, porque "id <> NULL" no devuelve ninguna fila
+  return db
+    .prepare("SELECT nombre FROM mascotas WHERE duenoId = ? AND id IS NOT ?")
+    .all(duenoId, excluirId)
     .some((m) => normalizar(m.nombre) === normalizar(nombre));
 }
 
@@ -46,17 +48,21 @@ function datosMascota(datos) {
   };
 }
 
+function buscarMascota(id) {
+  return db.prepare("SELECT * FROM mascotas WHERE id = ?").get(Number(id));
+}
+
 function registrarRutasMascotas(enrutador) {
   enrutador.get("/api/mascotas", (peticion) => {
     const { duenoId } = peticion.query;
     if (duenoId) {
-      return { datos: almacen.listar("mascotas", (m) => m.duenoId === Number(duenoId)) };
+      return { datos: db.prepare("SELECT * FROM mascotas WHERE duenoId = ? ORDER BY id").all(Number(duenoId)) };
     }
-    return { datos: almacen.listar("mascotas") };
+    return { datos: db.prepare("SELECT * FROM mascotas ORDER BY id").all() };
   });
 
   enrutador.get("/api/mascotas/:id", (peticion) => {
-    const mascota = almacen.buscarPorId("mascotas", peticion.params.id);
+    const mascota = buscarMascota(peticion.params.id);
     if (!mascota) throw new ErrorHttp(404, "La mascota no existe.");
     return { datos: mascota };
   });
@@ -69,7 +75,7 @@ function registrarRutasMascotas(enrutador) {
       throw new ErrorHttp(400, "Revisa los datos de la mascota.", errores);
     }
 
-    const dueno = almacen.buscarPorId("duenos", datos.duenoId);
+    const dueno = db.prepare("SELECT * FROM duenos WHERE id = ?").get(Number(datos.duenoId));
     if (!dueno) {
       throw new ErrorHttp(404, "El dueño no existe.", { duenoId: "El dueño no existe." });
     }
@@ -78,12 +84,15 @@ function registrarRutasMascotas(enrutador) {
       throw new ErrorHttp(409, mensaje, { nombre: mensaje });
     }
 
-    const mascota = almacen.insertar("mascotas", { ...datosMascota(datos), duenoId: Number(datos.duenoId) });
+    const { nombre, especie, raza, edad } = datosMascota(datos);
+    const mascota = db
+      .prepare("INSERT INTO mascotas (nombre, especie, raza, edad, duenoId) VALUES (?, ?, ?, ?, ?) RETURNING *")
+      .get(nombre, especie, raza, edad, dueno.id);
     return { estado: 201, datos: mascota };
   });
 
   enrutador.put("/api/mascotas/:id", (peticion) => {
-    const mascota = almacen.buscarPorId("mascotas", peticion.params.id);
+    const mascota = buscarMascota(peticion.params.id);
     if (!mascota) throw new ErrorHttp(404, "La mascota no existe.");
 
     const errores = validarMascota(peticion.cuerpo);
@@ -95,17 +104,19 @@ function registrarRutasMascotas(enrutador) {
       throw new ErrorHttp(409, mensaje, { nombre: mensaje });
     }
 
-    return { datos: almacen.actualizar("mascotas", mascota.id, datosMascota(peticion.cuerpo)) };
+    const { nombre, especie, raza, edad } = datosMascota(peticion.cuerpo);
+    const actualizada = db
+      .prepare("UPDATE mascotas SET nombre = ?, especie = ?, raza = ?, edad = ? WHERE id = ? RETURNING *")
+      .get(nombre, especie, raza, edad, mascota.id);
+    return { datos: actualizada };
   });
 
   enrutador.delete("/api/mascotas/:id", (peticion) => {
-    const mascota = almacen.buscarPorId("mascotas", peticion.params.id);
+    const mascota = buscarMascota(peticion.params.id);
     if (!mascota) throw new ErrorHttp(404, "La mascota no existe.");
 
-    // También se borran sus citas y atenciones, para no dejar datos sin mascota.
-    almacen.eliminarDonde("citas", (c) => c.mascotaId === mascota.id);
-    almacen.eliminarDonde("atenciones", (a) => a.mascotaId === mascota.id);
-    almacen.eliminar("mascotas", mascota.id);
+    // sus citas y atenciones se borran solas por el ON DELETE CASCADE
+    db.prepare("DELETE FROM mascotas WHERE id = ?").run(mascota.id);
     return { datos: mascota };
   });
 }

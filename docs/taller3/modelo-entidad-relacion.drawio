@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="modelo-er" name="Modelo entidad-relación">
+    <mxGraphModel dx="1200" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1180" pageHeight="270" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="dueno" value="DUEÑO" style="swimlane;fontStyle=1;startSize=30;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="210" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="dueno-attr" value="id (PK)&lt;br&gt;nombre&lt;br&gt;rut (único)&lt;br&gt;telefono&lt;br&gt;email" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;whiteSpace=wrap;fontColor=#000000;" vertex="1" parent="dueno">
+          <mxGeometry y="30" width="210" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mascota" value="MASCOTA" style="swimlane;fontStyle=1;startSize=30;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="330" y="40" width="210" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="mascota-attr" value="id (PK)&lt;br&gt;nombre&lt;br&gt;especie&lt;br&gt;raza&lt;br&gt;edad&lt;br&gt;duenoId (FK)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;whiteSpace=wrap;fontColor=#000000;" vertex="1" parent="mascota">
+          <mxGeometry y="30" width="210" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cita" value="CITA" style="swimlane;fontStyle=1;startSize=30;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="620" y="40" width="210" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="cita-attr" value="id (PK)&lt;br&gt;fecha&lt;br&gt;hora&lt;br&gt;motivo&lt;br&gt;observaciones&lt;br&gt;estado&lt;br&gt;mascotaId (FK)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;whiteSpace=wrap;fontColor=#000000;" vertex="1" parent="cita">
+          <mxGeometry y="30" width="210" height="115" as="geometry" />
+        </mxCell>
+
+        <mxCell id="atencion" value="ATENCIÓN" style="swimlane;fontStyle=1;startSize=30;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="910" y="40" width="210" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="atencion-attr" value="id (PK)&lt;br&gt;diagnostico&lt;br&gt;tratamiento&lt;br&gt;medicamentos&lt;br&gt;citaId (FK, único)" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;whiteSpace=wrap;fontColor=#000000;" vertex="1" parent="atencion">
+          <mxGeometry y="30" width="210" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r1" value="tiene" style="edgeStyle=none;html=1;startArrow=ERmandOne;endArrow=ERmany;startFill=0;endFill=0;strokeColor=#000000;fontColor=#000000;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.4615;" edge="1" parent="1" source="dueno" target="mascota">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" value="agenda" style="edgeStyle=none;html=1;startArrow=ERmandOne;endArrow=ERmany;startFill=0;endFill=0;strokeColor=#000000;fontColor=#000000;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.4615;entryX=0;entryY=0.4138;" edge="1" parent="1" source="mascota" target="cita">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" value="genera" style="edgeStyle=none;html=1;startArrow=ERmandOne;endArrow=ERzeroToOne;startFill=0;endFill=0;strokeColor=#000000;fontColor=#000000;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.4138;entryX=0;entryY=0.5;" edge="1" parent="1" source="cita" target="atencion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nota" value="Un dueño puede tener varias mascotas. Una mascota puede tener varias citas. Una cita genera como máximo una atención." style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="210" width="1080" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
