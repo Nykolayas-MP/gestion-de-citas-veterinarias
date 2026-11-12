@@ -264,3 +264,13 @@ Las capturas están en `docs/taller3/`.
 11. [Confirmación antes de eliminar](docs/taller3/11-confirmar-eliminacion.png).
 12. [Mascota eliminada](docs/taller3/12-mascota-eliminada-en-base.png) de la tabla `mascotas`.
 13. [Sus citas se borran solas](docs/taller3/13-cascada-citas-en-base.png) por el `ON DELETE CASCADE`.
+14. [La tabla `citas`](docs/taller3/14-citas-en-base.png) con las citas de ejemplo.
+15. [Cita agendada](docs/taller3/15-agendar-cita.png) desde el formulario (`POST /api/citas → 201`).
+16. [La cita nueva](docs/taller3/16-cita-nueva-en-base.png) en la tabla. Queda como pendiente sin que la página lo mande, porque ese es el valor por defecto de la columna.
+17. [Horario ocupado](docs/taller3/17-horario-ocupado.png): al agendar otra cita el mismo día, la hora recién tomada ya no se puede elegir.
+18. [Cita modificada](docs/taller3/18-modificar-cita.png) (`PUT /api/citas/6 → 200`).
+19. [El cambio en la base](docs/taller3/19-cita-modificada-en-base.png): misma fila, mismo id, datos nuevos.
+20. [Cita cancelada](docs/taller3/20-cancelar-cita.png) (`PATCH /api/citas/6/cancelar → 200`).
+21. [La cita cancelada en la base](docs/taller3/21-cita-cancelada-en-base.png). La fila no se borra, solo cambia su estado.
+22. [La hora se libera](docs/taller3/22-horario-liberado.png): como las canceladas no ocupan horario, se puede volver a tomar.
+23. [Filtro por estado](docs/taller3/23-filtro-pendientes.png) pedido directo a la API (`GET /api/citas?estado=pendiente → 200`). El filtro se convierte en `WHERE estado = ?` y la base devuelve solo las pendientes.
