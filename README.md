@@ -77,7 +77,7 @@ Los datos viven en memoria mientras el servidor está encendido. Al apagarlo se 
 
 ### Cómo encenderlo
 
-Hace falta tener Node.js 18 o más nuevo. Desde la carpeta `backend`:
+Hace falta tener Node.js 18 o más nuevo (desde el Taller 3, la 22.13, por la base de datos). Desde la carpeta `backend`:
 
 ```bash
 npm start
@@ -274,3 +274,115 @@ Las capturas están en `docs/taller3/`.
 21. [La cita cancelada en la base](docs/taller3/21-cita-cancelada-en-base.png). La fila no se borra, solo cambia su estado.
 22. [La hora se libera](docs/taller3/22-horario-liberado.png): como las canceladas no ocupan horario, se puede volver a tomar.
 23. [Filtro por estado](docs/taller3/23-filtro-pendientes.png) pedido directo a la API (`GET /api/citas?estado=pendiente → 200`). El filtro se convierte en `WHERE estado = ?` y la base devuelve solo las pendientes.
+
+## Taller 4: app móvil
+
+La app está en la carpeta `movil/` y la hicimos con React Native y Expo. No tiene datos propios: le pide todo a la misma API que usa la página, así que web y celular trabajan sobre la misma base. Si se agenda una cita en el celular, aparece en `citas.html`, y si se registra una mascota en la web, aparece en la app.
+
+### Qué hace
+
+| Pantalla | Qué muestra | Qué le pide a la API |
+|---|---|---|
+| Inicio | La fecha, las citas de hoy y cuántas quedan pendientes | `GET /api/citas?fecha=` |
+| Citas | Todas las citas, con filtro por estado | `GET /api/citas?estado=` |
+| Detalle de la cita | La cita con su mascota y dueño. Desde aquí se cancela | `GET` y `PATCH /api/citas/:id/cancelar` |
+| Agendar cita | Mascota, día, hora libre, motivo y observaciones | `GET /api/citas/horarios` y `POST /api/citas` |
+| Mascotas | Todas las mascotas, con buscador por mascota o dueño | `GET /api/mascotas` |
+| Ficha | Datos, dueño, historial clínico y citas de la mascota | varios `GET` |
+| Registrar mascota | El mismo formulario de la web, con dueño registrado o nuevo | `POST /api/duenos` y `POST /api/mascotas` |
+
+Abajo hay tres pestañas: Inicio, Citas y Mascotas. El detalle, la ficha y los formularios se abren encima, con la flecha para volver.
+
+### Cómo instalarla y probarla
+
+Hace falta:
+
+- Node.js 22.13 o más nuevo, el mismo del backend.
+- Un celular Android con la app **Expo Go**, que se baja gratis de la Play Store.
+- El celular y el computador conectados al **mismo Wi-Fi**.
+
+Primero se enciende el backend, como siempre, desde la carpeta `backend`:
+
+```bash
+npm start
+```
+
+Después, en otra terminal, desde la carpeta `movil`. La primera vez hay que instalar las dependencias:
+
+```bash
+npm install
+npx expo start
+```
+
+En la terminal aparece un código QR. Se abre Expo Go en el celular, se toca "Scan QR code" y la app carga en unos segundos. Si Windows pregunta si Node puede usar la red, hay que aceptar en redes privadas, porque si no el celular no llega al computador.
+
+No hay que escribir la IP del computador en ningún lado. Expo ya la conoce, porque el celular la usó para descargar la app, y `src/config.js` la toma de ahí para armar la dirección de la API (`http://192.168.1.10:3000/api`, por ejemplo).
+
+Si el celular no conecta, lo más probable es que el computador tenga más de una red (una VPN, por ejemplo) y Expo haya elegido la que no es. Se arregla indicándole la IP del Wi-Fi, que se ve con `ipconfig`:
+
+```bash
+set REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.10&& npx expo start
+```
+
+Si no hay celular a mano, `npm run web` abre la misma app en el navegador.
+
+No generamos un APK. Con Expo Go la app se instala y se prueba en cualquier Android sin pasar por la Play Store, y para un APK habría que dejar la IP del servidor fija dentro de la app.
+
+### Arquitectura final
+
+![Arquitectura final de VetCitas](docs/taller4/arquitectura.png)
+
+Es el diagrama del Taller 2 con lo que en ese momento estaba punteado. A la izquierda ahora hay dos clientes, la página y la app, y los dos hablan con el mismo servidor por HTTP y JSON. A la derecha, `almacen.js` ya no existe: las rutas consultan SQLite a través de `db.js`.
+
+El servidor no cambió para la app. Ya respondía JSON y ya aceptaba peticiones de otros orígenes (CORS) desde el Taller 2, justamente pensando en esto. La única diferencia es de dónde llegan: la página llama a `localhost`, porque corre en el mismo computador, y el celular llama a la IP del computador en la red Wi-Fi.
+
+El diagrama está en [docs/taller4/arquitectura.drawio](docs/taller4/arquitectura.drawio).
+
+### Cómo está organizada
+
+```
+movil/
+├── App.js                    la navegación: pestañas y pantallas de detalle
+└── src/
+    ├── config.js             arma la dirección de la API con la IP del computador
+    ├── api.js                api(), la misma idea que en frontend/js/data.js
+    ├── datos.js              junta citas, mascotas y dueños para mostrar nombres
+    ├── validaciones.js       las reglas de los formularios
+    ├── fechas.js             fechas en español y los próximos días hábiles
+    ├── estilos.js            los colores de la web y los estilos comunes
+    ├── componentes.js        piezas que se repiten y useDatos()
+    └── pantallas/            una por pantalla
+```
+
+Hay tres cosas que hicimos distinto a la web.
+
+Cada pantalla vuelve a pedir sus datos cada vez que se entra a ella, no solo la primera vez. Eso lo hace `useDatos()` en `componentes.js`. Sin esto, la demo de registrar en la web y verlo en el celular no funcionaría: la app seguiría mostrando lo que cargó al abrirse hasta cerrarla. En las listas también se puede tirar hacia abajo para actualizar.
+
+Las validaciones están otra vez en la app, igual que en el Taller 2 las repetimos en el servidor. En el formulario de mascota importa más que en otros. Con dueño nuevo, primero se registra el dueño y después la mascota, así que si la edad viniera mal y solo la revisara el servidor, quedaría un dueño guardado sin mascota. Por eso la app revisa todo antes de enviar lo primero.
+
+Y si el servidor no responde, `api.js` corta la espera a los 8 segundos y muestra un mensaje con la dirección a la que intentó conectarse. En el celular, una petición sin respuesta puede quedarse colgada mucho rato, y casi siempre la causa es el Wi-Fi o el firewall, no la app.
+
+### Evidencia de funcionamiento
+
+Las capturas están en `docs/taller4/`. Las del celular se tomaron en un Android con Expo Go.
+
+1. [Expo encendido](docs/taller4/01-expo-go-qr.png) con el código QR para abrir la app.
+2. [Inicio](docs/taller4/02-inicio.png) con las citas de hoy.
+3. [Todas las citas](docs/taller4/03-citas.png) cargadas desde el servidor.
+4. [Filtro de pendientes](docs/taller4/04-citas-filtro.png) (`GET /api/citas?estado=pendiente`).
+5. [Detalle de una cita](docs/taller4/05-detalle-cita.png) con su mascota y su dueño.
+6. [Lista de mascotas](docs/taller4/06-mascotas.png).
+7. [Buscador](docs/taller4/07-buscador.png): al escribir "Camila" aparecen sus dos mascotas.
+8. [Ficha de Michi](docs/taller4/08-ficha.png) con dueño, historial y citas.
+9. [Agendar cita](docs/taller4/09-agendar-cita.png): mascota, día y hora.
+10. [Cita agendada](docs/taller4/10-cita-agendada.png) (`POST /api/citas → 201`).
+11. [Choque de citas](docs/taller4/11-horario-ocupado.png): la hora ocupada aparece apagada y el servidor avisa que Luna ya tiene una cita ese día.
+12. [Formulario incompleto](docs/taller4/12-errores-formulario.png): cada campo muestra su error.
+13. [RUT inválido](docs/taller4/13-rut-invalido.png) al registrar un dueño nuevo.
+14. [Registro de una mascota](docs/taller4/14-registrar-mascota.png) con dueño nuevo.
+15. [Mascota registrada](docs/taller4/15-mascota-registrada.png) (`POST /api/duenos → 201` y `POST /api/mascotas → 201`).
+16. [Confirmación antes de cancelar](docs/taller4/16-confirmar-cancelacion.png).
+17. [Cita cancelada](docs/taller4/17-cita-cancelada.png) (`PATCH /api/citas/5/cancelar → 200`).
+18. [Del celular a la web](docs/taller4/18-celular-en-web.png): Elena, registrada en la app, aparece en `mascotas.html`.
+19. [Cita agendada en la web](docs/taller4/19-registro-en-web.png) para Elena.
+20. [De la web al celular](docs/taller4/20-web-en-celular.png): esa cita aparece en la app sin reiniciarla.
